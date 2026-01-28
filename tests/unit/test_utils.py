@@ -1,12 +1,20 @@
 """Unit tests for utility functions."""
 
+import json
 import os
 import tempfile
-import json
 
 import pytest
 
-from src.utils import ensure_directory, escape_title, format_number, is_ip_address
+from src.utils import (
+    ensure_directory,
+    escape_title,
+    format_number,
+    get_available_languages,
+    is_ip_address,
+    load_language_titles,
+    save_language_titles,
+)
 
 
 @pytest.mark.unit
