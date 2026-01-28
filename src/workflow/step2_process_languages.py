@@ -4,52 +4,18 @@ Step 2: Process languages
 
 from typing import Dict, List, Optional
 
-from ..config import BATCH_SIZE, OUTPUT_DIRS, HOST
+from ..config import BATCH_SIZE, OUTPUT_DIRS
 from ..logging_config import get_logger
-from ..services.database import Database
 from ..services.processor import EditorProcessor
 from ..services.queries import QueryBuilder
 from ..services.reports import ReportGenerator
 from ..utils import get_available_languages, load_language_titles
+from .db_mapping import get_database_mapping
 
 logger = get_logger(__name__)
 
 processor = EditorProcessor()
-
 query_builder = QueryBuilder()
-
-
-def get_database_mapping() -> Dict[str, str]:
-    """
-    Get mapping of language codes to database names from meta_p.
-
-    Returns:
-        Dictionary mapping language codes to database names
-
-    Example:
-        >>> orchestrator = WorkflowOrchestrator()
-        >>> mapping = orchestrator.get_database_mapping()
-        >>> # Returns: {"en": "enwiki_p", "fr": "frwiki_p", ...}
-    """
-    logger.info("Retrieving database name mappings from meta_p")
-
-    mapping: Dict[str, str] = {}
-
-    query = query_builder.get_database_mapping()
-
-    with Database(HOST, "meta_p") as db:
-        results = db.execute(query)
-
-        for row in results:
-            lang = row.get("lang", "")
-            dbname = row.get("dbname", "")
-
-            if lang and dbname:
-                mapping[lang] = dbname
-
-        logger.info("✓ Retrieved mappings for %d languages", len(mapping))
-
-    return mapping
 
 
 def _get_languages_to_process(languages: Optional[List[str]]) -> List[str]:

@@ -55,7 +55,7 @@ class QueryBuilder:
             SQL query string
         """
         return """
-            SELECT dbname, family, lang, url
+            SELECT lang, dbname, url
             FROM wiki
             WHERE is_closed = 0
               AND family = 'wikipedia'
