@@ -481,7 +481,6 @@ Edit `src/config.py` to customize:
 ```python
 # Example config.py
 LAST_YEAR = "2024"
-CURRENT_YEAR = "2025"
 BATCH_SIZE = 100
 MAX_CONNECTIONS = 5
 ```
@@ -1170,7 +1169,6 @@ CREDENTIAL_FILE=~/replica.my.cnf
 
 # Application Settings
 LAST_YEAR=2024
-CURRENT_YEAR=2025
 BATCH_SIZE=100
 MAX_CONNECTIONS=5
 

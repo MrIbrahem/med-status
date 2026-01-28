@@ -8,18 +8,18 @@ The Wikipedia Medicine project is designed as a modular data pipeline that retri
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Entry Point (main.py)                     │
-│  • CLI argument parsing                                          │
-│  • Logging configuration                                         │
-│  • Workflow orchestration                                        │
+│                        Entry Point (main.py)                    │
+│  • CLI argument parsing                                         │
+│  • Logging configuration                                        │
+│  • Workflow orchestration                                       │
 └────────────────┬────────────────────────────────────────────────┘
                  │
                  ▼
 ┌────────────────────────────────────────────────────────────────┐
-│                    Configuration (config.py)                    │
-│  • Years (LAST_YEAR, CURRENT_YEAR)                             │
-│  • Batch size, connection limits                                │
-│  • Output directories                                           │
+│                    Configuration (config.py)                   │
+│  • Years (LAST_YEAR)                                           │
+│  • Batch size, connection limits                               │
+│  • Output directories                                          │
 └────────────────────────────────────────────────────────────────┘
 
                  ┌────────────────────┐
@@ -30,7 +30,7 @@ The Wikipedia Medicine project is designed as a modular data pipeline that retri
         ▼                 ▼                 ▼
 ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
 │  Database    │  │   Queries    │  │  Processor   │
-│  (database.py)│  │ (queries.py) │  │(processor.py)│
+│ (database.py)│  │ (queries.py) │  │(processor.py)│
 └──────────────┘  └──────────────┘  └──────────────┘
         │                 │                 │
         │  Connections    │  SQL Templates  │  Aggregation
@@ -260,7 +260,6 @@ def ensure_directory(path: str) -> None
 **Key Constants:**
 ```python
 LAST_YEAR: str = "2024"
-CURRENT_YEAR: str = "2025"
 BATCH_SIZE: int = 100
 MAX_CONNECTIONS: int = 5
 CREDENTIAL_FILE: str = "~/replica.my.cnf"

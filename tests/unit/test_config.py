@@ -4,15 +4,6 @@ import pytest
 
 from src import config
 
-
-@pytest.mark.unit
-def test_current_year_is_string():
-    """Test CURRENT_YEAR is a string."""
-    assert isinstance(config.CURRENT_YEAR, str)
-    assert len(config.CURRENT_YEAR) == 4
-    assert config.CURRENT_YEAR.isdigit()
-
-
 @pytest.mark.unit
 def test_last_year_is_string():
     """Test LAST_YEAR is a string."""

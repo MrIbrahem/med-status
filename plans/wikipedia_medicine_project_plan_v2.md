@@ -297,7 +297,6 @@ from datetime import datetime
 from typing import Dict, Any
 
 # Years (dynamically calculated)
-CURRENT_YEAR: str = str(datetime.now().year)
 LAST_YEAR: str = str(datetime.now().year - 1)
 
 # Processing

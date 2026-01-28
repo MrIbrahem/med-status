@@ -35,7 +35,6 @@ I'm building a Wikipedia Medicine Editor Analysis tool in Python. Follow the imp
 2. **`src/config.py`** - Configuration constants
    ```python
    from datetime import datetime
-   CURRENT_YEAR = str(datetime.now().year)
    LAST_YEAR = str(datetime.now().year - 1)
    BATCH_SIZE = 100
    DATABASE_CONFIG = {...}

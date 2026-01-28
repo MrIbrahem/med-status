@@ -37,7 +37,7 @@ A Python application to retrieve and analyze editor contributions across Wikiped
 
 ### Step 1: Retrieve Medicine Titles by Language
 
-**Database**: `enwiki_p`  
+**Database**: `enwiki_p`
 **Host**: `enwiki.analytics.db.svc.wikimedia.cloud`
 
 ```sql
@@ -60,13 +60,13 @@ WHERE pap_project_title = "Medicine"
 
 ### Step 2: Get Language Database Names
 
-**Database**: `meta_p`  
+**Database**: `meta_p`
 **Host**: `meta.analytics.db.svc.wikimedia.cloud`
 
 ```sql
-SELECT dbname, family, lang, url 
-FROM wiki 
-WHERE is_closed = 0 
+SELECT dbname, family, lang, url
+FROM wiki
+WHERE is_closed = 0
   AND family = "wikipedia"
 ```
 
@@ -84,12 +84,12 @@ Process each language (except English and Arabic handle separately):
 #### 3A. Standard Languages Query
 
 ```sql
-SELECT actor_name, count(*) as count 
+SELECT actor_name, count(*) as count
 FROM revision
 JOIN actor ON rev_actor = actor_id
 JOIN page ON rev_page = page_id
-WHERE lower(cast(actor_name as CHAR)) NOT LIKE '%bot%' 
-  AND page_namespace = 0 
+WHERE lower(cast(actor_name as CHAR)) NOT LIKE '%bot%'
+  AND page_namespace = 0
   AND rev_timestamp LIKE '{last_year}%'
   AND page_id IN (
     SELECT page_id
@@ -110,12 +110,12 @@ ORDER BY count(*) DESC
 #### 3B. Arabic Wikipedia (ar)
 
 ```sql
-SELECT actor_name, count(*) as count 
+SELECT actor_name, count(*) as count
 FROM revision
 JOIN actor ON rev_actor = actor_id
 JOIN page ON rev_page = page_id
-WHERE lower(cast(actor_name as CHAR)) NOT LIKE '%bot%' 
-  AND page_namespace = 0 
+WHERE lower(cast(actor_name as CHAR)) NOT LIKE '%bot%'
+  AND page_namespace = 0
   AND rev_timestamp LIKE '{last_year}%'
   AND page_id IN (
     SELECT DISTINCT pa_page_id
@@ -131,36 +131,36 @@ LIMIT 100
 #### 3C. English Wikipedia (en)
 
 ```sql
-SELECT actor_name, count(*) 
-FROM revision 
-JOIN actor ON rev_actor = actor_id 
+SELECT actor_name, count(*)
+FROM revision
+JOIN actor ON rev_actor = actor_id
 JOIN page ON rev_page = page_id
-WHERE lower(cast(actor_name as CHAR)) NOT LIKE '%bot%' 
-  AND page_namespace = 0 
+WHERE lower(cast(actor_name as CHAR)) NOT LIKE '%bot%'
+  AND page_namespace = 0
   AND rev_timestamp LIKE '2025%'
   AND page_title IN (
-    SELECT page_title 
+    SELECT page_title
     FROM (
       SELECT tl_from, rd_from
       FROM templatelinks
       LEFT JOIN redirect
-        ON ((rd_from = tl_from) 
-            AND rd_title = 'WikiProject_Medicine' 
-            AND (rd_interwiki = '' OR rd_interwiki IS NULL) 
+        ON ((rd_from = tl_from)
+            AND rd_title = 'WikiProject_Medicine'
+            AND (rd_interwiki = '' OR rd_interwiki IS NULL)
             AND rd_namespace = '10')
       INNER JOIN page
         ON ((tl_from = page_id))
       JOIN linktarget
         ON ((tl_target_id = lt_id))
-      WHERE lt_namespace = '10' 
+      WHERE lt_namespace = '10'
         AND lt_title = 'WikiProject_Medicine'
       ORDER BY tl_from
-    ) temp_backlink_range 
-    INNER JOIN page ON ((tl_from = page_id)) 
+    ) temp_backlink_range
+    INNER JOIN page ON ((tl_from = page_id))
     WHERE page_namespace = '1'
   )
-GROUP BY actor_id 
-ORDER BY count(*) DESC 
+GROUP BY actor_id
+ORDER BY count(*) DESC
 LIMIT 100
 ```
 
@@ -168,7 +168,7 @@ LIMIT 100
 
 ### Step 4: Generate Per-Language Reports
 
-**Format**: WikiText table  
+**Format**: WikiText table
 **Output**: `reports/{lang}.wiki`
 
 ```wikitext
@@ -282,16 +282,16 @@ class Database:
         self.database = database
         self.port = port
         self.connection = None
-    
+
     def __enter__(self):
         # Read credentials from ~/replica.my.cnf
         # Establish connection
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         # Close connection
         pass
-    
+
     def execute(self, query, params=None):
         # Execute query with cursor
         pass
@@ -309,12 +309,11 @@ class Database:
 ```python
 # config.py
 LAST_YEAR = "2024"
-CURRENT_YEAR = "2025"
 BATCH_SIZE = 100
 MAX_CONNECTIONS = 5
 OUTPUT_DIRS = {
     "languages": "languages",
-    "editors": "editors", 
+    "editors": "editors",
     "reports": "reports"
 }
 CREDENTIAL_FILE = "~/replica.my.cnf"

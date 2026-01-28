@@ -16,7 +16,7 @@ This file provides context and guidelines for GitHub Copilot when assisting with
 
 4. **CI Requirements** (must pass for PR approval):
    - ✅ Black code formatting check
-   - ✅ isort import ordering check  
+   - ✅ isort import ordering check
    - ✅ Unit tests (excluding DB tests)
    - ⚠️ Type checking with mypy (advisory)
    - ⚠️ Integration tests (advisory)
@@ -31,7 +31,7 @@ This file provides context and guidelines for GitHub Copilot when assisting with
 6. **Repository Layout**:
    - `src/`: Source code
      - `main.py`: Application entry point
-     - `database.py`: Database connection management  
+     - `database.py`: Database connection management
      - `queries.py`: SQL query templates
      - `processor.py`: Data processing logic
      - `reports.py`: WikiText report generation
@@ -90,7 +90,7 @@ Always include type hints for function signatures:
 from typing import Dict, List, Optional
 
 def process_titles(
-    titles: List[str], 
+    titles: List[str],
     year: str,
     batch_size: int = 100
 ) -> Dict[str, int]:
@@ -105,22 +105,22 @@ Use Google-style docstrings for all public functions and classes:
 def get_editors(titles: List[str], year: str) -> Dict[str, int]:
     """
     Retrieve editor statistics for the given titles.
-    
+
     This function queries the database for all editors who made revisions
     to the specified articles during the given year.
-    
+
     Args:
         titles: List of article titles (URL-encoded with underscores)
         year: Year to filter revisions (e.g., "2024")
-    
+
     Returns:
         Dictionary mapping editor usernames to their edit counts.
         Example: {"Editor1": 150, "Editor2": 75}
-    
+
     Raises:
         pymysql.err.OperationalError: If database connection fails
         ValueError: If titles list is empty
-    
+
     Example:
         >>> editors = get_editors(["Barack_Obama"], "2024")
         >>> print(editors["JohnDoe"])
@@ -258,9 +258,9 @@ try:
     result = risky_operation()
 except ValueError as e:
     logger.error(
-        "Failed to process language '%s': %s", 
-        lang, 
-        str(e), 
+        "Failed to process language '%s': %s",
+        lang,
+        str(e),
         exc_info=True  # Includes stack trace
     )
     raise
@@ -337,13 +337,13 @@ def test_process_language(mocker):
         {"actor_name": "User1", "count": 10},
         {"actor_name": "User2", "count": 5}
     ]
-    
+
     # Mock Database class
     mocker.patch('src.processor.Database', return_value=mock_db)
-    
+
     processor = EditorProcessor()
     result = processor.process_language("es", ["Title1"], "eswiki", "2024")
-    
+
     assert result == {"User1": 10, "User2": 5}
 ```
 
@@ -432,25 +432,25 @@ class MyClass:
 ```python
 class MyClass:
     """Class docstring."""
-    
+
     # Class variables
     class_var = "value"
-    
+
     def __init__(self, param: str):
         """Initialize instance."""
         self.param = param
         self._private_var = None
-    
+
     # Public methods
     def public_method(self) -> str:
         """Public method docstring."""
         return self._private_method()
-    
+
     # Private methods
     def _private_method(self) -> str:
         """Private method docstring."""
         return "result"
-    
+
     # Special methods
     def __str__(self) -> str:
         """String representation."""
@@ -467,7 +467,7 @@ def log_progress(current: int, total: int, item_name: str = "items"):
     bar_length = 40
     filled = int(bar_length * current / total)
     bar = '█' * filled + '░' * (bar_length - filled)
-    
+
     logger.info(
         "Progress: [%s] %.1f%% (%d/%d %s)",
         bar, percentage, current, total, item_name
@@ -515,7 +515,6 @@ with open(filepath, 'w', encoding='utf-8') as f:
 from datetime import datetime
 
 # Always use dynamic calculation
-CURRENT_YEAR: str = str(datetime.now().year)
 LAST_YEAR: str = str(datetime.now().year - 1)
 
 # ✗ Never hardcode years
@@ -550,14 +549,14 @@ def process_titles(titles: List[str]) -> Dict[str, int]:
     """Process titles with validation."""
     if not titles:
         raise ValueError("Titles list cannot be empty")
-    
+
     if len(titles) > 10000:
         raise ValueError("Too many titles (max: 10000)")
-    
+
     for title in titles:
         if not isinstance(title, str):
             raise TypeError(f"Expected str, got {type(title)}")
-    
+
     # Process...
 ```
 
@@ -992,7 +991,7 @@ python -m src.main
 
 **Issue: Coverage report not generated**
 - **Cause**: Missing pytest-cov plugin
-- **Solution**: 
+- **Solution**:
   ```bash
   pip install pytest-cov
   make coverage
@@ -1010,7 +1009,7 @@ python -m src.main
   ```python
   # Bad
   long_string = "This is a very long string that exceeds 120 characters and should be broken up"
-  
+
   # Good
   long_string = (
       "This is a very long string that exceeds 120 characters "

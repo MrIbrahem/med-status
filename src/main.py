@@ -8,7 +8,7 @@ workflow for analyzing editor contributions across Wikipedia Medicine projects.
 import argparse
 import sys
 
-from .config import CURRENT_YEAR, LOG_LEVEL
+from .config import LAST_YEAR, LOG_LEVEL
 from .logging_config import get_logger, setup_logging
 from .workflow import WorkflowOrchestrator
 
@@ -38,7 +38,7 @@ Examples:
         """,
     )
 
-    parser.add_argument("--year", type=str, default=CURRENT_YEAR, help=f"Year to analyze (default: {CURRENT_YEAR})")
+    parser.add_argument("--year", type=str, default=LAST_YEAR, help=f"Year to analyze (default: {LAST_YEAR})")
 
     parser.add_argument(
         "--log-level",
