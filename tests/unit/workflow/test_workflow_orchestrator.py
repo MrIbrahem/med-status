@@ -32,7 +32,7 @@ class TestWorkflowOrchestrator:
         mock_db_context.__exit__ = mocker.Mock(return_value=None)
 
         # mocker.patch("src.workflow.step1_retrieve_titles.Database", return_value=mock_db_context)
-        mocker.patch("src.workflow.step2_process_languages.Database", return_value=mock_db_context)
+        mocker.patch("src.workflow.db_mapping.Database", return_value=mock_db_context)
 
         orchestrator = WorkflowOrchestrator()
         mapping = orchestrator.get_database_mapping()
