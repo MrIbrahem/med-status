@@ -121,14 +121,17 @@ class Database:
 
                 # Merge config with connection parameters, avoiding duplicate port
                 connect_params = DATABASE_CONFIG.copy()
-                # connect_params.pop("port", None)  # Remove port from config if present
 
-                logger.info("Connecting to database %s at host %s", self.database, self.host)
+                if connect_params.get("port"):
+                    self.port = connect_params["port"]
+                    connect_params.pop("port", None)  # Remove port from config if present
+
+                logger.info(f"Connecting to database {self.database} at host {self.host}:{self.port}")
 
                 self.connection = pymysql.connect(
                     host=self.host,
                     database=self.database,
-                    # port=self.port,
+                    port=self.port,
                     user=credentials["user"],
                     password=credentials["password"],
                     cursorclass=pymysql.cursors.DictCursor,
