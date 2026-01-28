@@ -114,6 +114,19 @@ def save_language_titles(lang: str, titles: List[str], output_dir: str = "langua
     logger.debug("Saved %d titles for language '%s' to %s", len(titles), lang, output_file)
 
 
+def save_titles_sql_results(titles: List[str], output_dir: Path) -> None:
+    """
+    Save article titles for a language to SQL results file.
+    """
+    ensure_directory(output_dir)
+    output_file = Path(output_dir) / "medicine_titles.json"
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(titles, f, ensure_ascii=False, indent=2)
+
+    logger.debug("Saved %d titles to %s", len(titles), output_file)
+
+
 def load_language_titles(lang: str, input_dir: str = "languages") -> List[str]:
     """
     Load article titles for a language from JSON file.

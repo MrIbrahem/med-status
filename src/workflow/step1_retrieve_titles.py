@@ -2,13 +2,13 @@
 Step 1: Retrieve medicine titles
 """
 
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from ..config import OUTPUT_DIRS, HOST
 from ..logging_config import get_logger
 from ..services.database import Database
 from ..services.queries import QueryBuilder
-from ..utils import save_language_titles
+from ..utils import save_language_titles, save_titles_sql_results
 
 logger = get_logger(__name__)
 
@@ -45,6 +45,29 @@ def _save_language_files(titles_by_language: Dict[str, List[str]]) -> None:
         save_language_titles(lang, titles, OUTPUT_DIRS["languages"])
 
 
+def fetch_medicine_titles() -> List[Dict[str, Any]]:
+    """
+    Retrieve Medicine project articles with langlinks from enwiki.
+    """
+    logger.info("=" * 60)
+    logger.info("Step 1: Retrieving Medicine articles from enwiki")
+    logger.info("=" * 60)
+    query_builder = QueryBuilder()
+    try:
+        query = query_builder.get_medicine_titles()
+
+        with Database(HOST, "enwiki_p") as db:
+            results = db.execute(query)
+            logger.info("Retrieved %d article-language pairs", len(results))
+            save_titles_sql_results(results, OUTPUT_DIRS["sqlresults"])
+            return results
+    except Exception as e:
+        logger.error("Failed to retrieve medicine titles: %s", str(e), exc_info=True)
+        raise
+
+    return []
+
+
 def retrieve_medicine_titles() -> Dict[str, List[str]]:
     """
     Retrieve Medicine project articles with langlinks from enwiki.
@@ -60,22 +83,14 @@ def retrieve_medicine_titles() -> Dict[str, List[str]]:
     logger.info("=" * 60)
     logger.info("Step 1: Retrieving Medicine articles from enwiki")
     logger.info("=" * 60)
-    query_builder = QueryBuilder()
-    try:
-        query = query_builder.get_medicine_titles()
 
-        with Database(HOST, "enwiki_p") as db:
-            results = db.execute(query)
-            logger.info("Retrieved %d article-language pairs", len(results))
+    results = fetch_medicine_titles()
+    logger.info("Retrieved %d article-language pairs", len(results))
 
-            titles_by_language = _organize_titles_by_language(results)
-            _save_language_files(titles_by_language)
+    titles_by_language = _organize_titles_by_language(results)
+    _save_language_files(titles_by_language)
 
-            logger.info("✓ Found %d languages with %d total articles", len(titles_by_language), len(results))
-
-    except Exception as e:
-        logger.error("Failed to retrieve medicine titles: %s", str(e), exc_info=True)
-        raise
+    logger.info("✓ Found %d languages with %d total articles", len(titles_by_language), len(results))
 
     return titles_by_language
 

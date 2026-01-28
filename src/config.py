@@ -31,6 +31,7 @@ DATA_DIR = Path(DATA_DIR).expanduser()
 
 # Output directories
 OUTPUT_DIRS: Dict[str, Path] = {
+    "sqlresults": DATA_DIR / "sqlresults",
     "languages": DATA_DIR / "languages",
     "editors": DATA_DIR / "editors",
     "reports": DATA_DIR / "reports",
