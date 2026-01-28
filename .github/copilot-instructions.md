@@ -339,7 +339,7 @@ def test_process_language(mocker):
     ]
 
     # Mock Database class
-    mocker.patch('src.processor.Database', return_value=mock_db)
+    mocker.patch('src.services.processor.Database', return_value=mock_db)
 
     processor = EditorProcessor()
     result = processor.process_language("es", ["Title1"], "eswiki", "2024")

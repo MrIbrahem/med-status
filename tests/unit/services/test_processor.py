@@ -17,7 +17,7 @@ class TestEditorProcessor:
         assert processor is not None
         assert processor.query_builder is not None
 
-    @patch("src.processor.Database")
+    @patch("src.services.processor.Database")
     def test_process_language_filters_ips(self, mock_db_class):
         """Test that IP addresses are filtered out."""
         # Setup mock
@@ -38,7 +38,7 @@ class TestEditorProcessor:
         assert "ValidUser" in editors
         assert editors["ValidUser"] == 50
 
-    @patch("src.processor.Database")
+    @patch("src.services.processor.Database")
     def test_process_language_filters_bots(self, mock_db_class):
         """Test that bot accounts are filtered out."""
         # Setup mock

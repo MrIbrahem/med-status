@@ -31,7 +31,7 @@ class TestDatabase:
         """Test database context manager."""
         with patch("os.path.exists", return_value=True):
             with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
-                with patch("src.database.pymysql.connect") as mock_connect:
+                with patch("src.services.database.pymysql.connect") as mock_connect:
                     mock_conn = Mock()
                     mock_connect.return_value = mock_conn
 
@@ -44,7 +44,7 @@ class TestDatabase:
         """Test query execution."""
         with patch("os.path.exists", return_value=True):
             with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
-                with patch("src.database.pymysql.connect") as mock_connect:
+                with patch("src.services.database.pymysql.connect") as mock_connect:
                     mock_cursor = MagicMock()
                     mock_cursor.fetchall.return_value = [{"id": 1, "name": "test"}]
                     mock_cursor.__enter__ = Mock(return_value=mock_cursor)

@@ -1080,7 +1080,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 """Unit tests for database module."""
 import pytest
 from unittest.mock import Mock, patch, MagicMock
-from src.database import Database
+from src.services.database import Database
 
 @pytest.mark.unit
 class TestDatabase:
@@ -1093,7 +1093,7 @@ class TestDatabase:
         assert db.database == "test_db"
         assert db.port == 3306
 
-    @patch('src.database.pymysql.connect')
+    @patch('src.services.database.pymysql.connect')
     def test_context_manager(self, mock_connect):
         """Test database context manager."""
         mock_conn = Mock()

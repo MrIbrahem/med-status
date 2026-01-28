@@ -5,8 +5,8 @@ Step 2: Process languages
 from typing import Dict, List, Optional
 
 from ..config import BATCH_SIZE, OUTPUT_DIRS
-from ..services.database import Database
 from ..logging_config import get_logger
+from ..services.database import Database
 from ..services.processor import EditorProcessor
 from ..services.queries import QueryBuilder
 from ..services.reports import ReportGenerator

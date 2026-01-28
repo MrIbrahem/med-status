@@ -4,6 +4,7 @@ import pytest
 
 from src import config
 
+
 @pytest.mark.unit
 def test_last_year_is_string():
     """Test LAST_YEAR is a string."""

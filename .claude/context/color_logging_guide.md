@@ -58,17 +58,17 @@ import colorlog
 def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
     """
     Configure colored logging for console and optional file output.
-    
+
     Args:
         level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         log_file: Optional file path for log output
-    
+
     Example:
         >>> setup_logging(level="DEBUG", log_file="app.log")
     """
     # Convert string level to logging constant
     numeric_level = getattr(logging, level.upper(), logging.INFO)
-    
+
     # Create color formatter for console
     console_formatter = colorlog.ColoredFormatter(
         fmt='%(log_color)s%(asctime)s - %(name)s - %(levelname)-8s%(reset)s %(message)s',
@@ -83,17 +83,17 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
         secondary_log_colors={},
         style='%'
     )
-    
+
     # Console handler with colors
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(console_formatter)
     console_handler.setLevel(numeric_level)
-    
+
     # Root logger configuration
     root_logger = logging.getLogger()
     root_logger.setLevel(numeric_level)
     root_logger.addHandler(console_handler)
-    
+
     # Optional file handler (no colors)
     if log_file:
         file_formatter = logging.Formatter(
@@ -104,7 +104,7 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
         file_handler.setFormatter(file_formatter)
         file_handler.setLevel(numeric_level)
         root_logger.addHandler(file_handler)
-    
+
     # Silence noisy third-party loggers
     logging.getLogger('urllib3').setLevel(logging.WARNING)
     logging.getLogger('pymysql').setLevel(logging.WARNING)
@@ -113,13 +113,13 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
 def get_logger(name: str) -> logging.Logger:
     """
     Get a logger instance for a module.
-    
+
     Args:
         name: Module name (typically __name__)
-    
+
     Returns:
         Logger instance
-    
+
     Example:
         >>> logger = get_logger(__name__)
         >>> logger.info("Module initialized")
@@ -144,25 +144,25 @@ logger = get_logger(__name__)
 
 def process_data(data):
     """Process data with comprehensive logging."""
-    
+
     # DEBUG - Detailed diagnostic info (CYAN)
     logger.debug("Starting data processing with %d items", len(data))
     logger.debug("Configuration: batch_size=%d, timeout=%d", 100, 30)
-    
+
     # INFO - Normal progress updates (GREEN)
     logger.info("Processing batch 1/10")
     logger.info("Found 45,231 articles across 87 languages")
     logger.info("Language 'es' complete: 156 editors found")
-    
+
     # WARNING - Recoverable issues (YELLOW)
     logger.warning("Skipped bot account: ExampleBot")
     logger.warning("Skipped IP address: 192.168.1.1")
     logger.warning("Retrying connection (attempt 2/3)")
-    
+
     # ERROR - Failures requiring attention (RED)
     logger.error("Failed to connect to dewiki_p: Connection timeout")
     logger.error("Query execution failed: %s", str(error), exc_info=True)
-    
+
     # CRITICAL - Severe errors (RED on WHITE background)
     logger.critical("Could not load credentials file: ~/replica.my.cnf")
     logger.critical("Fatal error: Cannot continue execution")
@@ -285,7 +285,7 @@ def log_progress(current: int, total: int, item_name: str = "items"):
     bar_length = 40
     filled = int(bar_length * current / total)
     bar = '█' * filled + '░' * (bar_length - filled)
-    
+
     logger.info(
         "Progress: [%s] %.1f%% (%d/%d %s)",
         bar, percentage, current, total, item_name
@@ -334,19 +334,19 @@ log_statistics({
 2025-01-28 14:30:15 - src.main - INFO     - ============================================================
 2025-01-28 14:30:15 - src.main - INFO     - Starting Wikipedia Medicine Editor Analysis
 2025-01-28 14:30:15 - src.main - INFO     - ============================================================
-2025-01-28 14:30:16 - src.database - DEBUG    - Connecting to enwiki.analytics.db.svc.wikimedia.cloud
-2025-01-28 14:30:17 - src.database - INFO     - Connected to enwiki_p successfully
+2025-01-28 14:30:16 - src.services.database - DEBUG    - Connecting to enwiki.analytics.db.svc.wikimedia.cloud
+2025-01-28 14:30:17 - src.services.database - INFO     - Connected to enwiki_p successfully
 2025-01-28 14:30:17 - src.main - INFO     - Step 1: Retrieving medicine titles from enwiki
 2025-01-28 14:30:45 - src.main - INFO     - Found 45,231 articles across 87 languages
 2025-01-28 14:30:45 - src.main - INFO     - Saved languages/en.json
-2025-01-28 14:30:46 - src.processor - INFO     - Processing language: es (1,234 articles)
-2025-01-28 14:30:47 - src.processor - DEBUG    - Executing query batch 1/13 (100 titles)
-2025-01-28 14:30:48 - src.processor - WARNING  - Skipped bot account: SpanishBot
-2025-01-28 14:30:49 - src.processor - WARNING  - Skipped IP address: 192.168.1.1
-2025-01-28 14:31:15 - src.processor - INFO     - Language 'es' complete: 156 editors found
-2025-01-28 14:31:16 - src.database - ERROR    - Failed to connect to dewiki_p: Connection timeout
-2025-01-28 14:31:17 - src.database - WARNING  - Retrying connection (attempt 2/3)
-2025-01-28 14:31:20 - src.database - INFO     - Connected to dewiki_p successfully
+2025-01-28 14:30:46 - src.services.processor - INFO     - Processing language: es (1,234 articles)
+2025-01-28 14:30:47 - src.services.processor - DEBUG    - Executing query batch 1/13 (100 titles)
+2025-01-28 14:30:48 - src.services.processor - WARNING  - Skipped bot account: SpanishBot
+2025-01-28 14:30:49 - src.services.processor - WARNING  - Skipped IP address: 192.168.1.1
+2025-01-28 14:31:15 - src.services.processor - INFO     - Language 'es' complete: 156 editors found
+2025-01-28 14:31:16 - src.services.database - ERROR    - Failed to connect to dewiki_p: Connection timeout
+2025-01-28 14:31:17 - src.services.database - WARNING  - Retrying connection (attempt 2/3)
+2025-01-28 14:31:20 - src.services.database - INFO     - Connected to dewiki_p successfully
 2025-01-28 14:45:30 - src.main - INFO     - ============================================================
 2025-01-28 14:45:30 - src.main - INFO     - Processing Complete
 2025-01-28 14:45:30 - src.main - INFO     - Total languages processed: 87
@@ -369,9 +369,9 @@ When logging to a file, colors are automatically stripped:
 
 ```
 2025-01-28 14:30:15 - src.main - INFO     - Starting Wikipedia Medicine Editor Analysis
-2025-01-28 14:30:17 - src.database - INFO     - Connected to enwiki_p successfully
+2025-01-28 14:30:17 - src.services.database - INFO     - Connected to enwiki_p successfully
 2025-01-28 14:30:45 - src.main - INFO     - Found 45,231 articles across 87 languages
-2025-01-28 14:31:16 - src.database - ERROR    - Failed to connect to dewiki_p: Connection timeout
+2025-01-28 14:31:16 - src.services.database - ERROR    - Failed to connect to dewiki_p: Connection timeout
 ```
 
 ---
@@ -410,31 +410,31 @@ def main():
     """Main application workflow."""
     # Parse arguments
     args = parse_arguments()
-    
+
     # Setup colored logging
     setup_logging(level=args.log_level, log_file=args.log_file)
-    
+
     # Log startup
     logger.info("=" * 60)
     logger.info("Starting Wikipedia Medicine Editor Analysis")
     logger.info("=" * 60)
     logger.debug("Log level: %s", args.log_level)
     logger.debug("Log file: %s", args.log_file or "console only")
-    
+
     try:
         # Run workflow steps
         logger.info("Step 1: Retrieving medicine titles")
         # ... implementation ...
-        
+
         logger.info("Step 2: Processing languages")
         # ... implementation ...
-        
+
         logger.info("✓ All steps completed successfully")
-        
+
     except Exception as e:
         logger.critical("Fatal error in main workflow: %s", str(e), exc_info=True)
         return 1
-    
+
     return 0
 
 
@@ -533,13 +533,13 @@ def test_all_levels():
     """Test all logging levels with colors."""
     setup_logging(level="DEBUG")
     logger = get_logger("test")
-    
+
     logger.debug("This is a DEBUG message (cyan)")
     logger.info("This is an INFO message (green)")
     logger.warning("This is a WARNING message (yellow)")
     logger.error("This is an ERROR message (red)")
     logger.critical("This is a CRITICAL message (red/white)")
-    
+
     logger.info("=" * 60)
     logger.info("Color test complete - check console output")
     logger.info("=" * 60)
@@ -632,12 +632,12 @@ LOG_COLORS = {
 
 ## Summary
 
-✅ **colorlog** provides colored console output  
-✅ **Green** INFO for progress, **Red** ERROR for failures  
-✅ **Yellow** WARNING for recoverable issues  
-✅ **Cyan** DEBUG for development details  
-✅ File output automatically strips colors  
-✅ Minimal performance impact  
-✅ Easy to configure per environment  
+✅ **colorlog** provides colored console output
+✅ **Green** INFO for progress, **Red** ERROR for failures
+✅ **Yellow** WARNING for recoverable issues
+✅ **Cyan** DEBUG for development details
+✅ File output automatically strips colors
+✅ Minimal performance impact
+✅ Easy to configure per environment
 
 Use colors to make logs **readable**, **scannable**, and **actionable**!

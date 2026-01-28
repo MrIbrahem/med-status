@@ -5,8 +5,8 @@ Step 1: Retrieve medicine titles
 from typing import Dict, List
 
 from ..config import OUTPUT_DIRS
-from ..services.database import Database
 from ..logging_config import get_logger
+from ..services.database import Database
 from ..services.queries import QueryBuilder
 from ..utils import save_language_titles
 

@@ -7,10 +7,10 @@ aggregating editor statistics from Wikipedia databases.
 
 from typing import Dict, List
 
-from .database import Database
 from ..logging_config import get_logger
-from .queries import QueryBuilder
 from ..utils import is_ip_address
+from .database import Database
+from .queries import QueryBuilder
 
 logger = get_logger(__name__)
 

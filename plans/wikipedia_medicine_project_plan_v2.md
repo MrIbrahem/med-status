@@ -694,7 +694,7 @@ class Database:
 """Test database module."""
 import pytest
 from unittest.mock import Mock, patch, mock_open
-from src.database import Database
+from src.services.database import Database
 
 
 @pytest.mark.unit
@@ -718,7 +718,7 @@ def test_load_credentials(mock_exists):
 
 
 @pytest.mark.unit
-@patch('src.database.pymysql.connect')
+@patch('src.services.database.pymysql.connect')
 @patch('builtins.open', mock_open(read_data='user=test\npassword=pass\n'))
 @patch('os.path.exists', return_value=True)
 def test_context_manager(mock_exists, mock_open_file, mock_connect):
