@@ -86,14 +86,13 @@ class Database:
             FileNotFoundError: If credential file doesn't exist
             ValueError: If credentials are malformed
         """
-        cred_file = os.path.expanduser(CREDENTIAL_FILE)
 
-        if not os.path.exists(cred_file):
-            logger.critical("Credential file not found: %s", cred_file)
-            raise FileNotFoundError(f"Credential file not found: {cred_file}")
+        if not os.path.exists(CREDENTIAL_FILE):
+            logger.critical("Credential file not found: %s", CREDENTIAL_FILE)
+            raise FileNotFoundError(f"Credential file not found: {CREDENTIAL_FILE}")
 
         credentials = {}
-        with open(cred_file, "r") as f:
+        with open(CREDENTIAL_FILE, "r") as f:
             for line in f:
                 line = line.strip()
                 if line.startswith("user"):
@@ -104,7 +103,7 @@ class Database:
         if "user" not in credentials or "password" not in credentials:
             raise ValueError("Invalid credential file format")
 
-        logger.debug("Credentials loaded from %s", cred_file)
+        logger.debug("Credentials loaded from %s", CREDENTIAL_FILE)
         return credentials
 
     def _connect(self) -> None:

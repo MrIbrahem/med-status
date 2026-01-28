@@ -8,6 +8,7 @@ import json
 import os
 import re
 from typing import List
+from pathlib import Path
 
 import pymysql.converters
 
@@ -88,9 +89,8 @@ def ensure_directory(path: str) -> None:
     Example:
         >>> ensure_directory("output/reports")
     """
-    if not os.path.exists(path):
-        os.makedirs(path, exist_ok=True)
-        logger.info("Created directory: %s", path)
+    Path(path).mkdir(parents=True, exist_ok=True)
+    logger.info("Created directory: %s", path)
 
 
 def save_language_titles(lang: str, titles: List[str], output_dir: str = "languages") -> None:
@@ -106,7 +106,7 @@ def save_language_titles(lang: str, titles: List[str], output_dir: str = "langua
         >>> save_language_titles("en", ["Medicine", "Health"], "languages")
     """
     ensure_directory(output_dir)
-    output_file = os.path.join(output_dir, f"{lang}.json")
+    output_file = Path(output_dir) / f"{lang}.json"
 
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(titles, f, ensure_ascii=False, indent=2)
@@ -131,9 +131,9 @@ def load_language_titles(lang: str, input_dir: str = "languages") -> List[str]:
     Example:
         >>> titles = load_language_titles("en", "languages")
     """
-    input_file = os.path.join(input_dir, f"{lang}.json")
+    input_file = Path(input_dir) / f"{lang}.json"
 
-    if not os.path.exists(input_file):
+    if not input_file.exists():
         raise FileNotFoundError(f"Language file not found: {input_file}")
 
     with open(input_file, "r", encoding="utf-8") as f:
