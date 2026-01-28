@@ -79,22 +79,13 @@ def main() -> int:
         logger.info("Languages: %s", ", ".join(args.languages))
     logger.info("=" * 60)
 
-    try:
-        # Initialize workflow orchestrator
-        orchestrator = WorkflowOrchestrator()
+    # Initialize workflow orchestrator
+    orchestrator = WorkflowOrchestrator()
 
-        # Run complete workflow
-        exit_code = orchestrator.run_complete_workflow(year=args.year, languages=args.languages)
+    # Run complete workflow
+    exit_code = orchestrator.run_complete_workflow(year=args.year, languages=args.languages)
 
-        return exit_code
-
-    except KeyboardInterrupt:
-        logger.warning("Analysis interrupted by user")
-        return 1
-
-    except Exception as e:
-        logger.error("Analysis failed: %s", str(e), exc_info=True)
-        return 1
+    return exit_code
 
 
 if __name__ == "__main__":
