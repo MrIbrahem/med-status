@@ -2,6 +2,7 @@
 
 import os
 import tempfile
+import json
 
 import pytest
 
@@ -53,3 +54,47 @@ class TestUtils:
             ensure_directory(test_dir)
             assert os.path.exists(test_dir)
             assert os.path.isdir(test_dir)
+
+    def test_save_and_load_language_titles(self):
+        """Test saving and loading language titles."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            titles = ["Medicine", "Health", "Disease"]
+            save_language_titles("en", titles, tmpdir)
+
+            # Verify file was created
+            output_file = os.path.join(tmpdir, "en.json")
+            assert os.path.exists(output_file)
+
+            # Verify content
+            loaded_titles = load_language_titles("en", tmpdir)
+            assert loaded_titles == titles
+
+    def test_load_language_titles_not_found(self):
+        """Test loading titles when file doesn't exist."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with pytest.raises(FileNotFoundError):
+                load_language_titles("nonexistent", tmpdir)
+
+    def test_get_available_languages(self):
+        """Test getting available languages."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create some language files
+            for lang in ["en", "fr", "es"]:
+                filepath = os.path.join(tmpdir, f"{lang}.json")
+                with open(filepath, "w") as f:
+                    json.dump([], f)
+
+            # Get available languages
+            languages = get_available_languages(tmpdir)
+            assert sorted(languages) == ["en", "es", "fr"]
+
+    def test_get_available_languages_empty_dir(self):
+        """Test getting languages from empty directory."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            languages = get_available_languages(tmpdir)
+            assert languages == []
+
+    def test_get_available_languages_nonexistent_dir(self):
+        """Test getting languages from nonexistent directory."""
+        languages = get_available_languages("/nonexistent/path")
+        assert languages == []

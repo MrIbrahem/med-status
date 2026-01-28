@@ -4,8 +4,10 @@ Utility functions for the Wikipedia Medicine project.
 This module provides helper functions used across the application.
 """
 
+import json
 import os
 import re
+from typing import List
 
 import pymysql.converters
 
@@ -89,3 +91,80 @@ def ensure_directory(path: str) -> None:
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True)
         logger.info("Created directory: %s", path)
+
+
+def save_language_titles(lang: str, titles: List[str], output_dir: str = "languages") -> None:
+    """
+    Save article titles for a language to JSON file.
+
+    Args:
+        lang: Language code (e.g., "en", "fr", "ar")
+        titles: List of article titles
+        output_dir: Output directory (default: "languages")
+
+    Example:
+        >>> save_language_titles("en", ["Medicine", "Health"], "languages")
+    """
+    ensure_directory(output_dir)
+    output_file = os.path.join(output_dir, f"{lang}.json")
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(titles, f, ensure_ascii=False, indent=2)
+
+    logger.debug("Saved %d titles for language '%s' to %s", len(titles), lang, output_file)
+
+
+def load_language_titles(lang: str, input_dir: str = "languages") -> List[str]:
+    """
+    Load article titles for a language from JSON file.
+
+    Args:
+        lang: Language code (e.g., "en", "fr", "ar")
+        input_dir: Input directory (default: "languages")
+
+    Returns:
+        List of article titles
+
+    Raises:
+        FileNotFoundError: If language file doesn't exist
+
+    Example:
+        >>> titles = load_language_titles("en", "languages")
+    """
+    input_file = os.path.join(input_dir, f"{lang}.json")
+
+    if not os.path.exists(input_file):
+        raise FileNotFoundError(f"Language file not found: {input_file}")
+
+    with open(input_file, "r", encoding="utf-8") as f:
+        titles = json.load(f)
+
+    logger.debug("Loaded %d titles for language '%s' from %s", len(titles), lang, input_file)
+    return titles
+
+
+def get_available_languages(input_dir: str = "languages") -> List[str]:
+    """
+    Get list of available language codes from the languages directory.
+
+    Args:
+        input_dir: Input directory (default: "languages")
+
+    Returns:
+        List of language codes
+
+    Example:
+        >>> langs = get_available_languages("languages")
+        >>> # Returns: ["en", "fr", "ar", ...]
+    """
+    if not os.path.exists(input_dir):
+        return []
+
+    languages = []
+    for filename in os.listdir(input_dir):
+        if filename.endswith(".json"):
+            lang = filename[:-5]  # Remove .json extension
+            languages.append(lang)
+
+    logger.debug("Found %d available languages", len(languages))
+    return sorted(languages)

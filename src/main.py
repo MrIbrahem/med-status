@@ -7,13 +7,10 @@ workflow for analyzing editor contributions across Wikipedia Medicine projects.
 
 import argparse
 import sys
-from typing import Dict
 
 from src.config import CURRENT_YEAR, LOG_LEVEL
-from src.logging_config import get_logger, setup_logging
-from src.processor import EditorProcessor
-from src.queries import QueryBuilder
-from src.reports import ReportGenerator
+from src.logging_config import setup_logging, get_logger
+from src.workflow import WorkflowOrchestrator
 
 logger = get_logger(__name__)
 
@@ -78,73 +75,18 @@ def main() -> int:
     logger.info("=" * 60)
     logger.info("Year: %s", args.year)
     logger.info("Log Level: %s", args.log_level)
+    if args.languages:
+        logger.info("Languages: %s", ", ".join(args.languages))
     logger.info("=" * 60)
 
     try:
-        # Initialize components
-        _ = QueryBuilder()  # noqa: F841
-        _ = EditorProcessor()  # noqa: F841
-        _ = ReportGenerator()  # noqa: F841
+        # Initialize workflow orchestrator
+        orchestrator = WorkflowOrchestrator()
 
-        # Step 1: Get Medicine articles with language links from English Wikipedia
-        logger.info("")
-        logger.info("=" * 60)
-        logger.info("Step 1: Retrieving Medicine articles from enwiki")
-        logger.info("=" * 60)
+        # Run complete workflow
+        exit_code = orchestrator.run_complete_workflow(year=args.year, languages=args.languages)
 
-        # This is a placeholder - in a real implementation, you would:
-        # 1. Query enwiki_p for Medicine articles with langlinks
-        # 2. Save language-specific title lists to languages/{lang}.json
-        # 3. Query meta_p for database name mapping
-
-        logger.info("✓ Step 1 complete")
-
-        # Step 2: Process each language
-        logger.info("")
-        logger.info("=" * 60)
-        logger.info("Step 2: Processing editor statistics by language")
-        logger.info("=" * 60)
-
-        # This is a placeholder - in a real implementation, you would:
-        # 1. Load title lists from languages/ directory
-        # 2. For each language, query editor statistics
-        # 3. Save results to editors/{lang}.json
-        # 4. Generate per-language reports
-
-        all_editors: Dict[str, Dict[str, int]] = {}  # noqa: F841
-
-        # Example: Process a single language (would be a loop in real implementation)
-        # lang = "en"
-        # titles = ["Medicine", "Health"]  # Would be loaded from file
-        # dbname = "enwiki_p"
-        # editors = processor.process_language(lang, titles, dbname, args.year)
-        # all_editors[lang] = editors
-        # report_generator.save_editors_json(lang, editors)
-        # report_generator.generate_language_report(lang, editors, args.year)
-
-        logger.info("✓ Step 2 complete")
-
-        # Step 3: Generate global report
-        logger.info("")
-        logger.info("=" * 60)
-        logger.info("Step 3: Generating global summary report")
-        logger.info("=" * 60)
-
-        # This would use the actual data in a real implementation
-        # report_generator.generate_global_report(all_editors, args.year)
-
-        logger.info("✓ Step 3 complete")
-
-        # Final summary
-        logger.info("")
-        logger.info("=" * 60)
-        logger.info("✓ Analysis complete!")
-        logger.info("=" * 60)
-        logger.info("Reports saved to: reports/")
-        logger.info("Editor data saved to: editors/")
-        logger.info("=" * 60)
-
-        return 0
+        return exit_code
 
     except KeyboardInterrupt:
         logger.warning("Analysis interrupted by user")
