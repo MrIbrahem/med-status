@@ -1,0 +1,13 @@
+"""Integration tests for complete workflow."""
+import pytest
+from unittest.mock import patch
+
+@pytest.mark.integration
+class TestWorkflow:
+    """Test complete workflow."""
+    
+    @pytest.mark.slow
+    def test_full_pipeline(self):
+        """Test complete data pipeline."""
+        # Implementation here
+        pass
