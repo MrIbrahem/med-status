@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, mock_open, patch
 
 import pytest
 
-from src.database import Database
+from src.services.database import Database
 
 
 @pytest.mark.unit

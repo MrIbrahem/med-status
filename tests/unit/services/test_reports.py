@@ -6,7 +6,7 @@ import os
 import pytest
 
 from src.config import OUTPUT_DIRS
-from src.reports import ReportGenerator
+from src.services.reports import ReportGenerator
 
 
 @pytest.mark.unit

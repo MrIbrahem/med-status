@@ -24,7 +24,7 @@ wikipedia-medicine/
 ├── src/
 │   ├── __init__.py
 │   ├── main.py                    # Entry point with CLI
-│   ├── logging_config.py          # ⭐ NEW: Color logging setup
+│   ├── logging_config.py          # Color logging setup
 │   ├── database.py                # Database connection management
 │   ├── queries.py                 # SQL query templates
 │   ├── processor.py               # Data processing logic
@@ -38,14 +38,14 @@ wikipedia-medicine/
 │   │   ├── test_queries.py
 │   │   ├── test_reports.py
 │   │   ├── test_utils.py
-│   │   └── test_logging_config.py # ⭐ NEW
+│   │   └── test_logging_config.py
 │   └── integration/
 │       ├── test_queries.py
 │       └── test_workflow.py
 ├── languages/                     # Article titles per language
 ├── editors/                       # Editor statistics per language
 ├── reports/                       # Generated reports
-├── .claude/                       # ⭐ NEW: Claude AI guidance
+├── .claude/                       # Claude AI guidance
 │   ├── README.md
 │   ├── CLAUDE.md
 │   ├── settings.json
@@ -56,24 +56,24 @@ wikipedia-medicine/
 │   │   ├── database_schema.md
 │   │   ├── conventions.md
 │   │   └── color_logging_guide.md
-│   └── examples/
+│   └── examples/s
 │       └── prompt_examples.md
 ├── .github/
 │   └── workflows/
 │       ├── pytest.yml
 │       └── lint.yml
 ├── pytest.ini
-├── pyproject.toml                 # ⭐ NEW: Modern Python config
+├── pyproject.toml                 # Modern Python config
 ├── requirements.txt
 ├── requirements-dev.txt
 ├── README.md
-├── CONTRIBUTING.md                # ⭐ NEW
-├── CHANGELOG.md                   # ⭐ NEW
+├── CONTRIBUTING.md
+├── CHANGELOG.md
 ├── LICENSE
 ├── .gitignore
 ├── .flake8
-├── .pre-commit-config.yaml        # ⭐ NEW
-└── Makefile                       # ⭐ NEW
+├── .pre-commit-config.yaml
+└── Makefile
 ```
 
 ---
@@ -155,16 +155,16 @@ import colorlog
 def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
     """
     Configure colored logging for console and optional file output.
-    
+
     Args:
         level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         log_file: Optional file path for log output
-    
+
     Example:
         >>> setup_logging(level="DEBUG", log_file="app.log")
     """
     numeric_level = getattr(logging, level.upper(), logging.INFO)
-    
+
     # Color formatter for console
     console_formatter = colorlog.ColoredFormatter(
         fmt='%(log_color)s%(asctime)s - %(name)s - %(levelname)-8s%(reset)s %(message)s',
@@ -177,17 +177,17 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
             'CRITICAL': 'red,bg_white',
         }
     )
-    
+
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(console_formatter)
     console_handler.setLevel(numeric_level)
-    
+
     # Root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(numeric_level)
     root_logger.addHandler(console_handler)
-    
+
     # Optional file handler (no colors)
     if log_file:
         file_formatter = logging.Formatter(
@@ -198,7 +198,7 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
         file_handler.setFormatter(file_formatter)
         file_handler.setLevel(numeric_level)
         root_logger.addHandler(file_handler)
-    
+
     # Silence noisy third-party loggers
     logging.getLogger('urllib3').setLevel(logging.WARNING)
     logging.getLogger('pymysql').setLevel(logging.WARNING)
@@ -237,12 +237,12 @@ def test_all_log_levels(capsys):
     """Test all log levels output."""
     setup_logging(level="DEBUG")
     logger = get_logger("test")
-    
+
     logger.debug("Debug message")
     logger.info("Info message")
     logger.warning("Warning message")
     logger.error("Error message")
-    
+
     captured = capsys.readouterr()
     assert "Debug message" in captured.out
     assert "Info message" in captured.out
@@ -383,13 +383,13 @@ logger = logging.getLogger(__name__)
 def is_ip_address(text: str) -> bool:
     """
     Check if text is an IP address (IPv4 or IPv6).
-    
+
     Args:
         text: String to check
-    
+
     Returns:
         True if text matches IP pattern, False otherwise
-    
+
     Example:
         >>> is_ip_address("192.168.1.1")
         True
@@ -398,23 +398,23 @@ def is_ip_address(text: str) -> bool:
     """
     # IPv4 pattern
     ipv4_pattern = r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$'
-    
+
     # IPv6 pattern (simplified)
     ipv6_pattern = r'^([0-9a-fA-F]{0,4}:){7}[0-9a-fA-F]{0,4}$'
-    
+
     return bool(re.match(ipv4_pattern, text) or re.match(ipv6_pattern, text))
 
 
 def escape_title(title: str) -> str:
     """
     Escape article title for SQL queries.
-    
+
     Args:
         title: Article title to escape
-    
+
     Returns:
         SQL-escaped title
-    
+
     Example:
         >>> escape_title("O'Reilly")
         "O\\'Reilly"
@@ -425,13 +425,13 @@ def escape_title(title: str) -> str:
 def format_number(num: int) -> str:
     """
     Format number with thousands separator.
-    
+
     Args:
         num: Number to format
-    
+
     Returns:
         Formatted number string
-    
+
     Example:
         >>> format_number(12345)
         "12,345"
@@ -442,13 +442,13 @@ def format_number(num: int) -> str:
 def ensure_directory(path: str) -> None:
     """
     Ensure directory exists, create if not.
-    
+
     Args:
         path: Directory path to ensure
-    
+
     Raises:
         OSError: If directory cannot be created
-    
+
     Example:
         >>> ensure_directory("output/reports")
     """
@@ -498,7 +498,7 @@ def test_format_number():
 
 **File**: `src/database.py`
 
-**Reference**: 
+**Reference**:
 - `.claude/context/architecture.md` - Database Manager section
 - `.claude/context/database_schema.md` - Connection details
 - `.claude/context/conventions.md` - Database code section
@@ -528,26 +528,26 @@ logger = logging.getLogger(__name__)
 class Database:
     """
     Context manager for database connections.
-    
+
     Manages connections to Wikimedia Toolforge databases with:
     - Automatic credential loading from ~/replica.my.cnf
     - Connection retry logic with exponential backoff
     - Proper resource cleanup via context manager
-    
+
     Attributes:
         host: Database host
         database: Database name
         port: Database port (default: 3306)
-    
+
     Example:
         >>> with Database("enwiki.analytics.db.svc.wikimedia.cloud", "enwiki_p") as db:
         ...     results = db.execute("SELECT * FROM page LIMIT 10")
     """
-    
+
     def __init__(self, host: str, database: str, port: int = 3306):
         """
         Initialize database connection parameters.
-        
+
         Args:
             host: Database host (e.g., "enwiki.analytics.db.svc.wikimedia.cloud")
             database: Database name (e.g., "enwiki_p")
@@ -557,46 +557,46 @@ class Database:
         self.database = database
         self.port = port
         self.connection: Optional[pymysql.connections.Connection] = None
-        
+
         logger.debug("Database initialized: %s/%s", host, database)
-    
+
     def __enter__(self) -> 'Database':
         """
         Enter context manager - establish connection.
-        
+
         Returns:
             self
-        
+
         Raises:
             pymysql.err.OperationalError: If connection fails after retries
         """
         self._connect()
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Exit context manager - close connection."""
         if self.connection:
             self.connection.close()
             logger.debug("Connection closed: %s/%s", self.host, self.database)
             self.connection = None
-    
+
     def _load_credentials(self) -> Dict[str, str]:
         """
         Load database credentials from ~/replica.my.cnf.
-        
+
         Returns:
             Dictionary with 'user' and 'password'
-        
+
         Raises:
             FileNotFoundError: If credential file doesn't exist
             ValueError: If credentials are malformed
         """
         cred_file = os.path.expanduser(CREDENTIAL_FILE)
-        
+
         if not os.path.exists(cred_file):
             logger.critical("Credential file not found: %s", cred_file)
             raise FileNotFoundError(f"Credential file not found: {cred_file}")
-        
+
         credentials = {}
         with open(cred_file, 'r') as f:
             for line in f:
@@ -605,27 +605,27 @@ class Database:
                     credentials['user'] = line.split('=')[1].strip()
                 elif line.startswith('password'):
                     credentials['password'] = line.split('=')[1].strip()
-        
+
         if 'user' not in credentials or 'password' not in credentials:
             raise ValueError("Invalid credential file format")
-        
+
         logger.debug("Credentials loaded from %s", cred_file)
         return credentials
-    
+
     def _connect(self) -> None:
         """
         Establish database connection with retry logic.
-        
+
         Raises:
             pymysql.err.OperationalError: If connection fails after max retries
         """
         credentials = self._load_credentials()
-        
+
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                logger.debug("Connecting to %s/%s (attempt %d/%d)", 
+                logger.debug("Connecting to %s/%s (attempt %d/%d)",
                            self.host, self.database, attempt, MAX_RETRIES)
-                
+
                 self.connection = pymysql.connect(
                     host=self.host,
                     database=self.database,
@@ -635,14 +635,14 @@ class Database:
                     cursorclass=pymysql.cursors.DictCursor,
                     **DATABASE_CONFIG
                 )
-                
+
                 logger.info("✓ Connected to %s/%s", self.host, self.database)
                 return
-                
+
             except pymysql.err.OperationalError as e:
-                logger.warning("Connection failed (attempt %d/%d): %s", 
+                logger.warning("Connection failed (attempt %d/%d): %s",
                              attempt, MAX_RETRIES, str(e))
-                
+
                 if attempt < MAX_RETRIES:
                     wait_time = 2 ** attempt  # Exponential backoff
                     logger.info("Retrying in %d seconds...", wait_time)
@@ -650,28 +650,28 @@ class Database:
                 else:
                     logger.error("Failed to connect after %d attempts", MAX_RETRIES)
                     raise
-    
+
     def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """
         Execute a SQL query and return results.
-        
+
         Args:
             query: SQL query to execute
             params: Optional query parameters
-        
+
         Returns:
             List of result rows as dictionaries
-        
+
         Raises:
             pymysql.err.ProgrammingError: If query has syntax errors
             pymysql.err.OperationalError: If query execution fails
-        
+
         Example:
             >>> results = db.execute("SELECT page_title FROM page LIMIT 10")
         """
         if not self.connection:
             raise RuntimeError("Database connection not established")
-        
+
         try:
             with self.connection.cursor() as cursor:
                 logger.debug("Executing query: %s...", query[:100])
@@ -679,11 +679,11 @@ class Database:
                 results = cursor.fetchall()
                 logger.debug("Query returned %d rows", len(results))
                 return results
-                
+
         except pymysql.err.ProgrammingError as e:
             logger.error("Query syntax error: %s\nQuery: %s", str(e), query[:200])
             raise
-            
+
         except pymysql.err.OperationalError as e:
             logger.error("Query execution error: %s", str(e))
             raise
@@ -726,10 +726,10 @@ def test_context_manager(mock_exists, mock_open_file, mock_connect):
     """Test database context manager."""
     mock_conn = Mock()
     mock_connect.return_value = mock_conn
-    
+
     with Database("localhost", "test_db") as db:
         assert db.connection == mock_conn
-    
+
     mock_conn.close.assert_called_once()
 ```
 
@@ -761,18 +761,18 @@ logger = logging.getLogger(__name__)
 class QueryBuilder:
     """
     SQL query builder for Wikimedia databases.
-    
+
     Provides static methods for building optimized SQL queries.
     All queries use indexed columns and are designed for read replicas.
     """
-    
+
     @staticmethod
     def get_medicine_titles() -> str:
         """
         Get Medicine project articles with language links.
-        
+
         Database: enwiki_p
-        
+
         Returns:
             SQL query string
         """
@@ -786,14 +786,14 @@ class QueryBuilder:
               AND page_is_redirect = 0
               AND page_namespace = 0
         """
-    
+
     @staticmethod
     def get_database_mapping() -> str:
         """
         Get mapping of language codes to database names.
-        
+
         Database: meta_p
-        
+
         Returns:
             SQL query string
         """
@@ -803,28 +803,28 @@ class QueryBuilder:
             WHERE is_closed = 0
               AND family = 'wikipedia'
         """
-    
+
     @staticmethod
     def get_editors_standard(titles: List[str], year: str) -> str:
         """
         Get editor statistics for given titles (standard languages).
-        
+
         Args:
             titles: List of article titles (will be escaped)
             year: Year to filter (e.g., "2024")
-        
+
         Returns:
             SQL query string with escaped titles
-        
+
         Note:
             Titles are automatically escaped to prevent SQL injection.
         """
         # Escape all titles
         escaped_titles = [escape_title(title) for title in titles]
         titles_str = "', '".join(escaped_titles)
-        
+
         logger.debug("Building query for %d titles in year %s", len(titles), year)
-        
+
         return f"""
             SELECT actor_name, COUNT(*) as count
             FROM revision
@@ -837,17 +837,17 @@ class QueryBuilder:
             GROUP BY actor_id
             ORDER BY count DESC
         """
-    
+
     @staticmethod
     def get_editors_arabic(year: str) -> str:
         """
         Get editor statistics for Arabic Wikipedia Medicine project.
-        
+
         Uses project assessment directly (no title filtering needed).
-        
+
         Args:
             year: Year to filter (e.g., "2024")
-        
+
         Returns:
             SQL query string
         """
@@ -869,17 +869,17 @@ class QueryBuilder:
             ORDER BY count DESC
             LIMIT 100
         """
-    
+
     @staticmethod
     def get_editors_english(year: str) -> str:
         """
         Get editor statistics for English Wikipedia Medicine project.
-        
+
         Uses WikiProject Medicine templatelinks on talk pages.
-        
+
         Args:
             year: Year to filter (e.g., "2025")
-        
+
         Returns:
             SQL query string
         """
@@ -1008,6 +1008,6 @@ make lint                     # All checks
 
 *This plan integrates all best practices, configurations, and guidance created for the project.*
 
-**Version**: 2.0  
-**Date**: 2025-01-28  
+**Version**: 2.0
+**Date**: 2025-01-28
 **Status**: Ready for implementation

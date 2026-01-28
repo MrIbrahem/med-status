@@ -8,9 +8,9 @@ workflow for analyzing editor contributions across Wikipedia Medicine projects.
 import argparse
 import sys
 
-from src.config import CURRENT_YEAR, LOG_LEVEL
-from src.logging_config import get_logger, setup_logging
-from src.workflow import WorkflowOrchestrator
+from .config import CURRENT_YEAR, LOG_LEVEL
+from .logging_config import get_logger, setup_logging
+from .workflow import WorkflowOrchestrator
 
 logger = get_logger(__name__)
 

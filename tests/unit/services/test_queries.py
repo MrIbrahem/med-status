@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.queries import QueryBuilder
+from src.services.queries import QueryBuilder
 
 
 @pytest.mark.unit

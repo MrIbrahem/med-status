@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from src.processor import EditorProcessor
+from src.services.processor import EditorProcessor
 
 
 @pytest.mark.unit

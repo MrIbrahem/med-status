@@ -5,11 +5,11 @@ Step 2: Process languages
 from typing import Dict, List, Optional
 
 from ..config import BATCH_SIZE, OUTPUT_DIRS
-from ..database import Database
+from ..services.database import Database
 from ..logging_config import get_logger
-from ..processor import EditorProcessor
-from ..queries import QueryBuilder
-from ..reports import ReportGenerator
+from ..services.processor import EditorProcessor
+from ..services.queries import QueryBuilder
+from ..services.reports import ReportGenerator
 from ..utils import get_available_languages, load_language_titles
 
 logger = get_logger(__name__)

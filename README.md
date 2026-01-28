@@ -88,11 +88,18 @@ python -m src.main --log-level DEBUG
 wikipedia-medicine/
 ├── src/
 │   ├── __init__.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── database.py      # Database connection management
+│   │   ├── processor.py     # Data processing logic
+│   │   ├── queries.py       # SQL query templates
+│   │   └── reports.py       # Report generation
+│   ├── workflow/
+│   │   ├── __init__.py
+│   │   ├── step1_retrieve_titles.py
+│   │   ├── step2_process_languages.py
+│   │   └── step3_generate_reports.py
 │   ├── main.py              # Entry point
-│   ├── database.py          # Database connection management
-│   ├── queries.py           # SQL query templates
-│   ├── processor.py         # Data processing logic
-│   ├── reports.py           # Report generation
 │   ├── config.py            # Configuration
 │   └── utils.py             # Helper functions
 ├── tests/
