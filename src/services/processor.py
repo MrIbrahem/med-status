@@ -7,11 +7,11 @@ aggregating editor statistics from Wikipedia databases.
 
 from typing import Dict, List
 
+from ..workflow.analytics_db import DatabaseAnalytics
+
 from ..logging_config import get_logger
 from ..utils import is_ip_address
-from .database import Database
 from .queries import QueryBuilder
-from ..config import HOST
 
 logger = get_logger(__name__)
 
@@ -30,7 +30,7 @@ class EditorProcessor:
         logger.debug("EditorProcessor initialized")
 
     def process_language(
-        self, lang: str, titles: List[str], dbname: str, year: str
+        self, lang: str, titles: List[str], year: str
     ) -> Dict[str, int]:
         """
         Process editor statistics for a specific language.
@@ -38,7 +38,6 @@ class EditorProcessor:
         Args:
             lang: Language code (e.g., "en", "ar", "fr")
             titles: List of article titles in this language
-            dbname: Database name (e.g., "enwiki_p")
             year: Year to filter (e.g., "2024")
 
         Returns:
@@ -46,10 +45,10 @@ class EditorProcessor:
 
         Example:
             >>> processor = EditorProcessor()
-            >>> editors = processor.process_language("en", ["Medicine"], "enwiki_p", "2024")
+            >>> editors = processor.process_language("en", ["Medicine"], "2024")
             >>> # Returns: {"Editor1": 150, "Editor2": 75, ...}
         """
-        logger.info("Processing language: %s (%s)", lang, dbname)
+        logger.info("Processing language: %s", lang)
         logger.debug("Processing %d titles for year %s", len(titles), year)
 
         editors: Dict[str, int] = {}
@@ -64,7 +63,7 @@ class EditorProcessor:
             query = self.query_builder.get_editors_standard(titles, year)
 
         try:
-            with Database(HOST, dbname) as db:
+            with DatabaseAnalytics(lang) as db:
                 results = db.execute(query)
 
                 for row in results:

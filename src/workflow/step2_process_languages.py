@@ -73,7 +73,7 @@ def _process_titles_for_language(
 ) -> Dict[str, int]:
     """Process titles for a language, with batching if needed."""
     if len(titles) <= batch_size:
-        return processor.process_language(lang, titles, dbname, year)
+        return processor.process_language(lang, titles, year)
 
     logger.info("Processing %d titles in batches of %d", len(titles), batch_size)
     editors: Dict[str, int] = {}
@@ -82,7 +82,7 @@ def _process_titles_for_language(
         batch = titles[batch_num : batch_num + batch_size]
         logger.debug("Processing batch %d-%d", batch_num, batch_num + len(batch))
 
-        batch_editors = processor.process_language(lang, batch, dbname, year)
+        batch_editors = processor.process_language(lang, batch, year)
 
         # Merge batch results
         for editor, count in batch_editors.items():
