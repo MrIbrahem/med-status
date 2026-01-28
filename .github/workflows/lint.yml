@@ -1,0 +1,37 @@
+name: Linting
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    
+    - name: Install dependencies
+      run: |
+        pip install flake8 black isort pylint mypy
+    
+    - name: Run flake8
+      run: flake8 src tests
+      continue-on-error: true
+    
+    - name: Run black
+      run: black --check --diff src tests
+    
+    - name: Run isort
+      run: isort --check-only --diff src tests
+    
+    - name: Run pylint
+      run: pylint src
+      continue-on-error: true
