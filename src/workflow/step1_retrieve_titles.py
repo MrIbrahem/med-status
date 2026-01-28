@@ -4,9 +4,9 @@ Step 1: Retrieve medicine titles
 
 from typing import Dict, List, Any
 
-from ..config import OUTPUT_DIRS, HOST
+from ..config import OUTPUT_DIRS
 from ..logging_config import get_logger
-from ..services.database import Database
+from .analytics_db import DatabaseAnalytics
 from ..services.queries import QueryBuilder
 from ..utils import save_language_titles, save_titles_sql_results
 
@@ -53,7 +53,7 @@ def fetch_medicine_titles() -> List[Dict[str, Any]]:
     try:
         query = query_builder.get_medicine_titles()
 
-        with Database(HOST, "enwiki_p") as db:
+        with DatabaseAnalytics("en") as db:
             results = db.execute(query)
             logger.info("Retrieved %d article-language pairs", len(results))
             save_titles_sql_results(results, OUTPUT_DIRS["sqlresults"])

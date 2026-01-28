@@ -123,6 +123,8 @@ class Database:
                 connect_params = DATABASE_CONFIG.copy()
                 # connect_params.pop("port", None)  # Remove port from config if present
 
+                logger.info("Connecting to database %s at host %s", self.database, self.host)
+
                 self.connection = pymysql.connect(
                     host=self.host,
                     database=self.database,
