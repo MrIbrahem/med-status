@@ -1,6 +1,7 @@
 """
 
 """
+import functools
 import json
 from pathlib import Path
 from typing import Dict
@@ -67,17 +68,23 @@ def fetch_database_mapping() -> Dict[str, str]:
         results = db.execute(query)
 
         for row in results:
+            url = row.get("url", "")
             lang = row.get("lang", "")
             dbname = row.get("dbname", "")
-
-            if lang and dbname:
+            if not dbname:
+                continue
+            if lang:
                 mapping[lang] = dbname
+            if url:
+                url_lang = url.split(".")[0].replace("https://", "")
+                mapping[url_lang] = dbname
 
         logger.info("✓ Retrieved mappings for %d languages", len(mapping))
 
     return mapping
 
 
+@functools.lru_cache(maxsize=1)
 def get_database_mapping() -> Dict[str, str]:
     """
     Get mapping of language codes to database names from meta_p.
