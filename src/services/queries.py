@@ -83,7 +83,8 @@ class QueryBuilder:
 
         logger.debug("Building query for %d titles in year %s", len(titles), year)
 
-        return f"""
+        return (
+            f"""
             SELECT actor_name, COUNT(*) as count
             FROM revision
             JOIN actor ON rev_actor = actor_id
@@ -94,7 +95,9 @@ class QueryBuilder:
               AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
             GROUP BY actor_id
             ORDER BY count DESC
-        """, []
+        """,
+            [],
+        )
 
     @staticmethod
     def get_editors_arabic(year: str) -> tuple[str, List[str]]:
