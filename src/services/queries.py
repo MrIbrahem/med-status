@@ -88,17 +88,17 @@ class QueryBuilder:
 
         return (
             f"""
-            SELECT actor_name, COUNT(*) as count
-            FROM revision
-            JOIN actor ON rev_actor = actor_id
-            JOIN page ON rev_page = page_id
-            WHERE page_title IN ('{titles_str}')
-              AND page_namespace = 0
-              AND YEAR(rev_timestamp) = '{year}'
-              AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
-            GROUP BY actor_id
-            ORDER BY count DESC
-        """,
+                SELECT actor_name, COUNT(*) as count
+                FROM revision
+                JOIN actor ON rev_actor = actor_id
+                JOIN page ON rev_page = page_id
+                WHERE page_title IN ('{titles_str}')
+                AND page_namespace = 0
+                AND YEAR(rev_timestamp) = '{year}'
+                AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
+                GROUP BY actor_id
+                ORDER BY count DESC
+            """,
             [],
         )
 

@@ -135,7 +135,7 @@ def process_languages(
 
     for i, (lang, titles) in enumerate(languages_titles.items(), 1):
         logger.info("-" * 60)
-        logger.info("Language %d/%d: %s", i, len(languages_titles), lang)
+        logger.info(f"Language {i}/{len(languages_titles)}: {lang}, titles: {len(titles):,}")
         logger.info("-" * 60)
         lang_editors = _process_single_language(lang, year, batch_size, titles)
         if lang_editors:
