@@ -105,3 +105,179 @@ class TestDatabaseUtils:
 
         assert db_name1 == "be_x_oldwiki_p"
         assert db_name1 == db_name2 == db_name3
+
+    def test_resolve_bytes_with_bytes(self):
+        """Test resolve_bytes with bytes input."""
+        db_utils = DatabaseUtils()
+        result = db_utils.resolve_bytes(b"test string")
+        assert result == "test string"
+
+    def test_resolve_bytes_with_bytes_invalid_utf8(self):
+        """Test resolve_bytes with invalid UTF-8 bytes."""
+        db_utils = DatabaseUtils()
+        # Invalid UTF-8 sequence
+        result = db_utils.resolve_bytes(b"\xff\xfe")
+        assert isinstance(result, str)
+
+    def test_resolve_bytes_with_dict(self):
+        """Test resolve_bytes with dict containing bytes."""
+        db_utils = DatabaseUtils()
+        result = db_utils.resolve_bytes({"key": b"value", "num": 42})
+        assert result["key"] == "value"
+        assert result["num"] == 42
+
+    def test_resolve_bytes_with_list(self):
+        """Test resolve_bytes with list containing bytes."""
+        db_utils = DatabaseUtils()
+        result = db_utils.resolve_bytes([b"item1", b"item2", "regular"])
+        assert result == ["item1", "item2", "regular"]
+
+    def test_resolve_bytes_with_nested_structure(self):
+        """Test resolve_bytes with nested structure."""
+        db_utils = DatabaseUtils()
+        result = db_utils.resolve_bytes({"list": [b"item"], "dict": {b"key": b"value"}})
+        assert result["list"] == ["item"]
+        assert result["dict"]["key"] == "value"
+
+
+@pytest.mark.unit
+class TestDatabaseEdgeCases:
+    """Test Database edge cases and error handling."""
+
+    def test_exit_without_connection(self):
+        """Test __exit__ when connection is None."""
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
+                db = Database("localhost", "test")
+                # Don't enter context, so connection remains None
+                db.__exit__(None, None, None)
+                assert db.connection is None
+
+    def test_load_credentials_file_not_found(self):
+        """Test _load_credentials when credential file doesn't exist."""
+        with patch("os.path.exists", return_value=False):
+            db = Database("localhost", "test")
+            with pytest.raises(FileNotFoundError, match="Credential file not found"):
+                db._load_credentials()
+
+    def test_load_credentials_malformed_missing_user(self):
+        """Test _load_credentials when user is missing."""
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="password=pass\n")):
+                db = Database("localhost", "test")
+                with pytest.raises(ValueError, match="Invalid credential file format"):
+                    db._load_credentials()
+
+    def test_load_credentials_malformed_missing_password(self):
+        """Test _load_credentials when password is missing."""
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="user=test\n")):
+                db = Database("localhost", "test")
+                with pytest.raises(ValueError, match="Invalid credential file format"):
+                    db._load_credentials()
+
+    def test_load_credentials_empty_lines(self, mocker):
+        """Test _load_credentials with empty lines."""
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="\nuser=test\n\npassword=pass\n")):
+                db = Database("localhost", "test")
+                creds = db._load_credentials()
+                assert creds["user"] == "test"
+                assert creds["password"] == "pass"
+
+    def test_load_credentials_with_comments(self, mocker):
+        """Test _load_credentials ignores lines that don't start with user/password."""
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="# comment\nuser=test\npassword=pass\n")):
+                db = Database("localhost", "test")
+                creds = db._load_credentials()
+                assert creds["user"] == "test"
+                assert creds["password"] == "pass"
+
+    def test_connect_with_retry_success(self, mocker):
+        """Test _connect with retry on first failure, success on second."""
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
+                import pymysql
+
+                mock_conn = Mock()
+                # First call fails, second succeeds
+                mocker.patch.object(
+                    pymysql,
+                    "connect",
+                    side_effect=[
+                        pymysql.err.OperationalError(1205, "Lock wait timeout"),
+                        mock_conn,
+                    ],
+                )
+
+                db = Database("localhost", "test")
+                mocker.patch("time.sleep")  # Skip actual sleep
+
+                db._connect()
+                assert db.connection == mock_conn
+
+    def test_connect_with_retry_exhausted(self, mocker):
+        """Test _connect when all retries are exhausted."""
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
+                import pymysql
+
+                mocker.patch.object(
+                    pymysql,
+                    "connect",
+                    side_effect=pymysql.err.OperationalError(1205, "Lock wait timeout"),
+                )
+
+                db = Database("localhost", "test")
+                mocker.patch("time.sleep")  # Skip actual sleep
+
+                with pytest.raises(pymysql.err.OperationalError):
+                    db._connect()
+
+    def test_execute_without_connection(self, mocker):
+        """Test execute when connection is not established."""
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
+                db = Database("localhost", "test")
+                # Don't enter context, connection remains None
+                with pytest.raises(RuntimeError, match="Database connection not established"):
+                    db.execute("SELECT * FROM test")
+
+    def test_execute_with_programming_error(self, mocker):
+        """Test execute with SQL syntax error."""
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
+                import pymysql
+
+                mock_cursor = MagicMock()
+                mock_cursor.execute.side_effect = pymysql.err.ProgrammingError(1064, "syntax error")
+                mock_cursor.__enter__ = Mock(return_value=mock_cursor)
+                mock_cursor.__exit__ = Mock(return_value=False)
+
+                mock_conn = Mock()
+                mock_conn.cursor.return_value = mock_cursor
+
+                with patch("src.services.database.pymysql.connect", return_value=mock_conn):
+                    with Database("localhost", "test") as db:
+                        with pytest.raises(pymysql.err.ProgrammingError):
+                            db.execute("INVALID SQL")
+
+    def test_execute_with_operational_error(self, mocker):
+        """Test execute with operational error during query execution."""
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
+                import pymysql
+
+                mock_cursor = MagicMock()
+                mock_cursor.execute.side_effect = pymysql.err.OperationalError(2002, "Connection lost")
+                mock_cursor.__enter__ = Mock(return_value=mock_cursor)
+                mock_cursor.__exit__ = Mock(return_value=False)
+
+                mock_conn = Mock()
+                mock_conn.cursor.return_value = mock_cursor
+
+                with patch("src.services.database.pymysql.connect", return_value=mock_conn):
+                    with Database("localhost", "test") as db:
+                        with pytest.raises(pymysql.err.OperationalError):
+                            db.execute("SELECT * FROM test")
