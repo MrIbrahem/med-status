@@ -38,7 +38,12 @@ def parse_arguments() -> argparse.Namespace:
         """,
     )
 
-    parser.add_argument("--year", type=str, default=LAST_YEAR, help=f"Year to analyze (default: {LAST_YEAR})")
+    parser.add_argument(
+        "--year",
+        type=str,
+        default=LAST_YEAR,
+        help=f"Year to analyze (default: {LAST_YEAR})",
+    )
 
     parser.add_argument(
         "--log-level",
@@ -51,7 +56,11 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--log-file", type=str, default=None, help="Optional log file path")
 
     parser.add_argument(
-        "--languages", type=str, nargs="+", default=None, help="Specific languages to process (default: all)"
+        "--languages",
+        type=str,
+        nargs="+",
+        default=None,
+        help="Specific languages to process (default: all)",
     )
     parser.add_argument(
         "--skip-steps",

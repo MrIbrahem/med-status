@@ -100,7 +100,11 @@ def download_medicine_titles() -> None:
     _save_language_files(titles_by_language)
     _save_language_summary_report(titles_by_language)
 
-    logger.info("✓ Found %d languages with %d total articles", len(titles_by_language), len(results))
+    logger.info(
+        "✓ Found %d languages with %d total articles",
+        len(titles_by_language),
+        len(results),
+    )
 
 
 __all__ = [

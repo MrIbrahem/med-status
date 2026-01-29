@@ -92,4 +92,4 @@ class TestReportGenerator:
         result = generator.load_editors_json("nonexistent_lang")
 
         # Should return empty list when file not found
-        assert result == []
+        assert result == {}

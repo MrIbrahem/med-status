@@ -54,7 +54,7 @@ class EditorProcessor:
                 logger.debug("Skipped bot account: %s", actor_name)
                 continue
 
-            editors[actor_name] = count
+            editors[actor_name] = editors.get(actor_name, 0) + count
 
         return editors
 
@@ -82,7 +82,7 @@ class EditorProcessor:
         results = []
         try:
             # https://quarry.wmcloud.org/query/101549 Executed in 2289.70 seconds
-            with DatabaseAnalytics(lang, timeout=3_000) as db:
+            with DatabaseAnalytics(lang, timeout=None) as db:
                 results = db.execute(query, params=params)
 
         except Exception as e:
@@ -140,7 +140,9 @@ class EditorProcessor:
                     logger.error("Failed to process language %s: %s", lang, str(e), exc_info=True)
                     raise
 
-                editors.update(self._aggregate_results(results))
+                editors_patch = self._aggregate_results(results)
+                for editor, count in editors_patch.items():
+                    editors[editor] = editors.get(editor, 0) + count
 
         return editors
 

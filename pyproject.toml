@@ -63,8 +63,3 @@ disable = [
     "C0103",  # invalid-name
     "R0913",  # too-many-arguments
 ]
-
-[tool.pytest.ini_options]
-minversion = "7.0"
-addopts = "-ra -q --strict-markers"
-testpaths = ["tests"]
