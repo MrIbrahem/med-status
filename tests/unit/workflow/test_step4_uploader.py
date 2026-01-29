@@ -1,6 +1,6 @@
 """Test report uploader service."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, mock_open, patch
 
 import pytest
 from src.workflow.step4_uploader import ReportUploader
@@ -26,20 +26,12 @@ def test_get_report_files(mock_path):
 
 @pytest.mark.unit
 @patch("src.workflow.step4_uploader.PageMWClient")
-@patch("builtins.open", new_callable=Mock, create=True)
-@patch("os.path.exists")
+@patch("builtins.open", new_callable=mock_open, read_data="Test content")
 @patch("os.path.basename")
-@patch("os.path.join")
-def test_upload_report_success(mock_join, mock_basename, mock_exists, mock_open_class, mock_page_class):
+def test_upload_report_success(mock_basename, mock_open_class, mock_page_class):
     """Test successful report upload."""
     # Setup mocks
-    mock_join.return_value = "/path/ar.wiki"
     mock_basename.return_value = "ar.wiki"
-    mock_exists.return_value = True
-
-    mock_file = Mock()
-    mock_file.read.return_value = "Test content"
-    mock_open_class.return_value.__enter__.return_value = mock_file
 
     mock_page = Mock()
     mock_page.exists.return_value = False
@@ -55,20 +47,12 @@ def test_upload_report_success(mock_join, mock_basename, mock_exists, mock_open_
 
 @pytest.mark.unit
 @patch("src.workflow.step4_uploader.PageMWClient")
-@patch("builtins.open", new_callable=Mock, create=True)
-@patch("os.path.exists")
+@patch("builtins.open", new_callable=mock_open, read_data="Global content")
 @patch("os.path.basename")
-@patch("os.path.join")
-def test_upload_report_global(mock_join, mock_basename, mock_exists, mock_open_class, mock_page_class):
+def test_upload_report_global(mock_basename, mock_open_class, mock_page_class):
     """Test uploading global (total_report) file."""
     # Setup mocks
-    mock_join.return_value = "/path/total_report.wiki"
     mock_basename.return_value = "total_report.wiki"
-    mock_exists.return_value = True
-
-    mock_file = Mock()
-    mock_file.read.return_value = "Global content"
-    mock_open_class.return_value.__enter__.return_value = mock_file
 
     mock_page = Mock()
     mock_page.exists.return_value = False
@@ -99,21 +83,17 @@ def test_get_report_files_no_directory(mock_path):
 
 @pytest.mark.unit
 @patch("src.workflow.step4_uploader.PageMWClient")
-@patch("builtins.open", new_callable=Mock, create=True)
-@patch("os.path.exists")
+@patch("builtins.open", new_callable=mock_open, read_data="Test content")
 @patch("os.path.basename")
-@patch("os.path.join")
-def test_upload_report_file_read_error(
-    mock_join, mock_basename, mock_exists, mock_open_class, mock_page_class
-):
+def test_upload_report_file_read_error(mock_basename, mock_open_class, mock_page_class):
     """Test report upload when file read fails."""
     # Setup mocks
-    mock_join.return_value = "/path/ar.wiki"
     mock_basename.return_value = "ar.wiki"
-    mock_exists.return_value = True
 
-    # Make open raise an exception
-    mock_open_class.side_effect = IOError("File not found")
+    mock_page = Mock()
+    mock_page.exists.return_value = False
+    mock_page.save.side_effect = IOError("Upload failed")
+    mock_page_class.return_value = mock_page
 
     uploader = ReportUploader()
     success = uploader._upload_report("/path/ar.wiki", "2025")
@@ -165,7 +145,7 @@ def test_upload_all_reports_multiple(mock_path, mock_upload):
 
 @pytest.mark.unit
 @patch("src.workflow.step4_uploader.PageMWClient")
-@patch("builtins.open", new_callable=Mock, create=True)
+@patch("builtins.open", new_callable=mock_open, read_data="Test content")
 @patch("os.path.exists")
 @patch("os.path.join")
 def test_upload_single_report(mock_join, mock_exists, mock_open_class, mock_page_class):
@@ -173,10 +153,6 @@ def test_upload_single_report(mock_join, mock_exists, mock_open_class, mock_page
     # Setup mocks
     mock_join.return_value = "/reports/ar.wiki"
     mock_exists.return_value = True
-
-    mock_file = Mock()
-    mock_file.read.return_value = "Test content"
-    mock_open_class.return_value.__enter__.return_value = mock_file
 
     mock_page = Mock()
     mock_page.exists.return_value = False
@@ -205,7 +181,7 @@ def test_upload_single_report_file_not_found(mock_join, mock_exists):
 
 @pytest.mark.unit
 @patch("src.workflow.step4_uploader.PageMWClient")
-@patch("builtins.open", new_callable=Mock, create=True)
+@patch("builtins.open", new_callable=mock_open, read_data="Global content")
 @patch("os.path.exists")
 @patch("os.path.join")
 def test_upload_single_report_global(mock_join, mock_exists, mock_open_class, mock_page_class):
@@ -213,10 +189,6 @@ def test_upload_single_report_global(mock_join, mock_exists, mock_open_class, mo
     # Setup mocks
     mock_join.return_value = "/reports/total_report.wiki"
     mock_exists.return_value = True
-
-    mock_file = Mock()
-    mock_file.read.return_value = "Global content"
-    mock_open_class.return_value.__enter__.return_value = mock_file
 
     mock_page = Mock()
     mock_page.exists.return_value = False
