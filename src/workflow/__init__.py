@@ -39,7 +39,11 @@ class WorkflowOrchestrator:
         return get_database_mapping()
 
     def process_languages(
-        self, year: str, languages: Optional[List[str]] = None, sort_descending: bool = False
+        self,
+        year: str,
+        languages: Optional[List[str]] = None,
+        sort_descending: bool = False,
+        skip_existing: bool = False,
     ) -> dict:
         """
         Process editor statistics for specified languages.
@@ -51,7 +55,7 @@ class WorkflowOrchestrator:
         Returns:
             Dictionary of all editors processed across languages
         """
-        return process_languages(year, languages, sort_descending=sort_descending)
+        return process_languages(year, languages, sort_descending=sort_descending, skip_existing=skip_existing)
 
     def generate_reports(
         self,
@@ -82,6 +86,7 @@ class WorkflowOrchestrator:
         languages: Optional[List[str]] = None,
         skip_steps: Optional[List[int]] = None,
         sort_desc: bool = True,
+        skip_existing: bool = False,
     ) -> int:
         """
         Run the complete workflow from start to finish.
@@ -90,6 +95,8 @@ class WorkflowOrchestrator:
             year: Year to analyze (e.g., "2024")
             languages: Optional list of specific languages to process
             skip_steps: Optional list of workflow steps to skip
+            sort_desc: Whether to sort languages by titles in descending order
+            skip_existing: Whether to skip processing languages that have existing data
 
         Returns:
             Exit code (0 for success, 1 for failure)
@@ -106,7 +113,9 @@ class WorkflowOrchestrator:
 
         if not skip_steps or 2 not in skip_steps:
             # Step 2: Process languages
-            all_editors = self.process_languages(year, languages, sort_descending=sort_desc)
+            all_editors = self.process_languages(
+                year, languages, sort_descending=sort_desc, skip_existing=skip_existing
+            )
         else:
             logger.info("✓ Skipping Step 2: Process editor statistics for languages")
             all_editors = {}

@@ -66,6 +66,12 @@ def parse_arguments() -> argparse.Namespace:
         action="store_true",
         help="Sort languages by titles DESC in step 2 (default: ASC)",
     )
+    parser.add_argument(
+        "--skip-existing",
+        action="store_true",
+        help="Skip processing languages that have existing data in step 2",
+    )
+
     return parser.parse_args()
 
 
@@ -104,6 +110,7 @@ def main() -> int:
         languages=args.languages,
         skip_steps=args.skip_steps,
         sort_desc=args.desc,
+        skip_existing=args.skip_existing,
     )
 
     return exit_code

@@ -57,6 +57,7 @@ class DatabaseUtils:
             "yue": "zh_yuewiki_p",
             "zh-yue": "zh_yuewiki_p",
         }
+        dbname = dbname.replace("-", "_")
         dbname_normalized = dbname.strip().lower().removesuffix("_p").removesuffix("wiki")
         if dbname_normalized in pre_defined_db_mapping:
             return pre_defined_db_mapping[dbname_normalized]
@@ -108,7 +109,7 @@ class Database(DatabaseUtils):
         ...     results = db.execute("SELECT * FROM page LIMIT 10")
     """
 
-    def __init__(self, host: str, database: str, port: int = 3306):
+    def __init__(self, host: str, database: str, port: int = 3306, timeout: Optional[float] = None) -> None:
         """
         Initialize database connection parameters.
 
@@ -116,7 +117,9 @@ class Database(DatabaseUtils):
             host: Database host (e.g., "enwiki.analytics.db.svc.wikimedia.cloud")
             database: Database name (e.g., "enwiki_p")
             port: Database port (default: 3306)
+            timeout: Connection timeout in seconds (default: None)
         """
+        self.timeout = timeout
         self.host = host
         self.database = self._check_database_name(database)
         self.port = port
@@ -194,6 +197,9 @@ class Database(DatabaseUtils):
                 if connect_params.get("port"):
                     self.port = connect_params["port"]
                     connect_params.pop("port", None)  # Remove port from config if present
+
+                if self.timeout is not None:
+                    connect_params["connect_timeout"] = self.timeout
 
                 logger.info(f"Connecting to database {self.database} at host {self.host}:{self.port}")
 

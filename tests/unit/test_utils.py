@@ -12,7 +12,9 @@ from src.utils import (
     get_available_languages,
     is_ip_address,
     load_language_titles,
+    load_language_titles_safe,
     save_language_titles,
+    save_titles_sql_results,
 )
 
 
@@ -97,3 +99,40 @@ class TestUtils:
         """Test getting languages from nonexistent directory."""
         languages = get_available_languages("/nonexistent/path")
         assert languages == []
+
+    def test_save_titles_sql_results(self):
+        """Test saving SQL results to JSON."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = tmpdir
+            titles = ["Medicine", "Health", "Disease"]
+            save_titles_sql_results(titles, tmp_path)
+
+            # Verify file was created
+            output_file = os.path.join(tmp_path, "medicine_titles.json")
+            assert os.path.exists(output_file)
+
+            # Verify content
+            with open(output_file, "r") as f:
+                data = json.load(f)
+                assert data == titles
+
+    def test_save_titles_sql_results_error_fallback(self):
+        """Test save_titles_sql_results fallback on error."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = tmpdir
+            # Create a directory that will cause json.dump to fail
+            output_file = os.path.join(tmp_path, "medicine_titles.json")
+            os.mkdir(output_file)  # Create as directory instead of file
+
+            titles = ["Medicine", "Health"]
+            save_titles_sql_results(titles, tmp_path)
+
+            # Should create .text fallback file
+            fallback_file = os.path.join(tmp_path, "medicine_titles.text")
+            assert os.path.exists(fallback_file)
+
+    def test_load_language_titles_safe(self):
+        """Test load_language_titles_safe returns empty list on error."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            result = load_language_titles_safe("nonexistent", tmpdir)
+            assert result == []

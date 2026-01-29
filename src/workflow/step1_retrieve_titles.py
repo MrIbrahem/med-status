@@ -43,7 +43,7 @@ def _save_language_summary_report(titles_by_language: Dict[str, List[str]]) -> N
     wiki_text = "Language Titles Summary:\n"
     wiki_text += '{| class="wikitable"\n! Language !! Number of Titles\n'
     for lang, count in data.items():
-        wiki_text += f"| {lang} || {count}\n"
+        wiki_text += f"|-\n| [https://{lang}.wikipedia.org/wiki/ {lang}] || {count}\n"
     wiki_text += "|}\n"
 
     with open(output_file, "w", encoding="utf-8") as f:

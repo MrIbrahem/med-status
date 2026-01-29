@@ -39,7 +39,6 @@ def _process_single_language(
 ) -> Dict[str, int]:
     """Process a single language."""
     report_generator = ReportGenerator()
-
     editors = _process_titles_for_language(lang, titles, year, batch_size)
 
     if editors:
@@ -57,26 +56,11 @@ def _process_titles_for_language(
     batch_size: int,
 ) -> Dict[str, int]:
     """Process titles for a language, with batching if needed."""
-    if len(titles) <= batch_size:
-        return processor.process_language(lang, titles, year)
 
-    logger.info("Processing %d titles in batches of %d", len(titles), batch_size)
-    editors: Dict[str, int] = {}
+    if lang in ["ar", "en"]:
+        return processor.process_language_ar_en(lang, year)
 
-    for batch_num in range(0, len(titles), batch_size):
-        batch = titles[batch_num : batch_num + batch_size]
-        logger.debug("Processing batch %d-%d", batch_num, batch_num + len(batch))
-
-        batch_editors = processor.process_language(lang, batch, year)
-
-        # Merge batch results
-        for editor, count in batch_editors.items():
-            if editor in editors:
-                editors[editor] += count
-            else:
-                editors[editor] = count
-
-    return editors
+    return processor.process_language_patch(lang, titles, year, batch_size)
 
 
 def gather_language_titles(languages_to_process: List[str], sort_descending: bool = False) -> dict[str, list[str]]:
@@ -104,6 +88,7 @@ def process_languages(
     languages: Optional[List[str]] = None,
     batch_size: int = BATCH_SIZE,
     sort_descending: bool = False,
+    skip_existing: bool = False,
 ) -> Dict[str, Dict[str, int]]:
     """
     Process editor statistics for all or specified languages.
@@ -127,6 +112,12 @@ def process_languages(
 
     logger.info("Processing %d languages", len(languages_to_process))
 
+    report_generator = ReportGenerator()
+    if skip_existing:
+        languages_to_skip = [lang for lang in languages_to_process if report_generator.load_editors_json(lang)]
+        languages_to_process = [lang for lang in languages_to_process if lang not in languages_to_skip]
+        logger.info("✓ Skipped %d languages with existing data", len(languages_to_skip))
+
     languages_titles: dict[str, list[str]] = gather_language_titles(
         languages_to_process, sort_descending=sort_descending
     )
@@ -135,7 +126,7 @@ def process_languages(
 
     for i, (lang, titles) in enumerate(languages_titles.items(), 1):
         logger.info("-" * 60)
-        logger.info("Language %d/%d: %s", i, len(languages_titles), lang)
+        logger.info(f"Language {i}/{len(languages_titles)}: {lang}, titles: {len(titles):,}")
         logger.info("-" * 60)
         lang_editors = _process_single_language(lang, year, batch_size, titles)
         if lang_editors:

@@ -25,3 +25,4 @@ dmypy.json
 /STATUS_DATA/languages
 STATUS_DATA/sqlresults/medicine_titles.json
 STATUS_DATA/sqlresults/medicine_titles_1.json
+/STATUS_DATA/editors

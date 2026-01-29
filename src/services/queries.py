@@ -75,32 +75,31 @@ class QueryBuilder:
             year: Year to filter (e.g., "2024")
 
         Returns:
-            SQL query string with escaped titles
+            Tuple of SQL query string and parameters list
 
         Note:
             Titles are automatically escaped to prevent SQL injection.
         """
-        # Escape all titles
-        escaped_titles = [escape_title(title) for title in titles]
-        titles_str = "', '".join(escaped_titles)
+        if not titles:
+            raise ValueError("Titles list cannot be empty")
 
         logger.debug("Building query for %d titles in year %s", len(titles), year)
 
-        return (
-            f"""
-            SELECT actor_name, COUNT(*) as count
-            FROM revision
-            JOIN actor ON rev_actor = actor_id
-            JOIN page ON rev_page = page_id
-            WHERE page_title IN ('{titles_str}')
-              AND page_namespace = 0
-              AND YEAR(rev_timestamp) = '{year}'
-              AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
-            GROUP BY actor_id
-            ORDER BY count DESC
-        """,
-            [],
-        )
+        placeholders = ", ".join(["%s"] * len(titles))
+        query = f"""
+                SELECT actor_name, COUNT(*) as count
+                FROM revision
+                JOIN actor ON rev_actor = actor_id
+                JOIN page ON rev_page = page_id
+                WHERE page_title IN ({placeholders})
+                AND page_namespace = 0
+                AND YEAR(rev_timestamp) = %s
+                AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%%bot%%'
+                GROUP BY actor_id
+                ORDER BY count DESC
+            """
+        params = titles + [year]
+        return query, params
 
     @staticmethod
     def get_editors_arabic(year: str) -> tuple[str, List[str]]:

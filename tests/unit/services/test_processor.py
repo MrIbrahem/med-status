@@ -69,3 +69,83 @@ class TestEditorProcessor:
         assert aggregated["Editor1"] == 125  # 100 + 25
         assert aggregated["Editor2"] == 50
         assert aggregated["Editor3"] == 75
+
+    @patch("src.services.processor.DatabaseAnalytics")
+    def test_process_language_ar_en_arabic(self, mock_db_class):
+        """Test process_language_ar_en for Arabic."""
+        mock_db = MagicMock()
+        mock_db.__enter__ = Mock(return_value=mock_db)
+        mock_db.__exit__ = Mock(return_value=False)
+        mock_db.execute.return_value = [
+            {"actor_name": "Editor1", "count": 100},
+            {"actor_name": "Editor2", "count": 50},
+        ]
+        mock_db_class.return_value = mock_db
+
+        processor = EditorProcessor()
+        editors = processor.process_language_ar_en("ar", "2024")
+
+        assert editors == {"Editor1": 100, "Editor2": 50}
+
+    @patch("src.services.processor.DatabaseAnalytics")
+    def test_process_language_ar_en_english(self, mock_db_class):
+        """Test process_language_ar_en for English."""
+        mock_db = MagicMock()
+        mock_db.__enter__ = Mock(return_value=mock_db)
+        mock_db.__exit__ = Mock(return_value=False)
+        mock_db.execute.return_value = [
+            {"actor_name": "Editor1", "count": 200},
+            {"actor_name": "Editor2", "count": 75},
+        ]
+        mock_db_class.return_value = mock_db
+
+        processor = EditorProcessor()
+        editors = processor.process_language_ar_en("en", "2024")
+
+        assert editors == {"Editor1": 200, "Editor2": 75}
+
+    @patch("src.services.processor.DatabaseAnalytics")
+    def test_process_language_ar_en_error(self, mock_db_class):
+        """Test process_language_ar_en error handling."""
+        mock_db = MagicMock()
+        mock_db.__enter__ = Mock(side_effect=Exception("Database error"))
+        mock_db.__exit__ = Mock(return_value=False)
+        mock_db_class.return_value = mock_db
+
+        processor = EditorProcessor()
+
+        with pytest.raises(Exception, match="Database error"):
+            processor.process_language_ar_en("ar", "2024")
+
+    @patch("src.services.processor.DatabaseAnalytics")
+    def test_process_language_patch_error(self, mock_db_class):
+        """Test process_language_patch exception handling."""
+        mock_db = MagicMock()
+        mock_db.__enter__ = Mock(return_value=mock_db)
+        mock_db.__exit__ = Mock(return_value=False)
+        mock_db.execute.side_effect = Exception("Query failed")
+        mock_db_class.return_value = mock_db
+
+        processor = EditorProcessor()
+
+        with pytest.raises(Exception, match="Query failed"):
+            processor.process_language_patch("fr", ["Title1"], "2024")
+
+    @patch("src.services.processor.DatabaseAnalytics")
+    def test_process_language_ar_en_branch(self, mock_db_class):
+        """Test process_language routes to ar_en for ar/en languages."""
+        mock_db = MagicMock()
+        mock_db.__enter__ = Mock(return_value=mock_db)
+        mock_db.__exit__ = Mock(return_value=False)
+        mock_db.execute.return_value = [{"actor_name": "Editor1", "count": 100}]
+        mock_db_class.return_value = mock_db
+
+        processor = EditorProcessor()
+
+        # Test Arabic
+        editors_ar = processor.process_language("ar", [], "2024")
+        assert editors_ar == {"Editor1": 100}
+
+        # Test English
+        editors_en = processor.process_language("en", [], "2024")
+        assert editors_en == {"Editor1": 100}

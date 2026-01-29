@@ -29,6 +29,23 @@ class ReportGenerator:
         """Initialize the report generator."""
         logger.debug("ReportGenerator initialized")
 
+    def load_editors_json(self, lang: str) -> list:
+        """
+        Load editor statistics from JSON file.
+
+        Args:
+            lang: Language code
+        """
+        input_file = Path(OUTPUT_DIRS["editors"]) / f"{lang}.json"
+        if not input_file.exists():
+            logger.warning("Editor data file not found: %s", input_file)
+            return []
+
+        with open(input_file, "r", encoding="utf-8") as f:
+            editors = json.load(f)
+            logger.info("✓ Loaded editor data from %s", input_file)
+        return editors
+
     def save_editors_json(self, lang: str, editors: Dict[str, int]) -> None:
         """
         Save editor statistics to JSON file.

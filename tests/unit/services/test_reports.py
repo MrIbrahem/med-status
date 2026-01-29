@@ -84,3 +84,12 @@ class TestReportGenerator:
 
         # Cleanup
         os.remove(output_file)
+
+    def test_load_editors_json_file_not_found(self):
+        """Test loading editors JSON when file doesn't exist."""
+        generator = ReportGenerator()
+
+        result = generator.load_editors_json("nonexistent_lang")
+
+        # Should return empty list when file not found
+        assert result == []
