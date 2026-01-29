@@ -113,7 +113,7 @@ class ReportGenerator:
         output_file = Path(OUTPUT_DIRS["reports"]) / f"{lang}.wiki"
 
         # Sort editors by edit count (descending)
-        sorted_editors = sorted(editors.items(), key=lambda x: x[1], reverse=True)
+        sorted_editors = dict(sorted(editors.items(), key=lambda x: x[1], reverse=True))
 
         text = "{{:WPM:WikiProject Medicine/Total medical articles}}\n"
         text += f"{{{{Top medical editors by lang|{year}}}}}\n"
