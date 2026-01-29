@@ -5,7 +5,7 @@ import functools
 import json
 from pathlib import Path
 from typing import Dict
-from ..config import HOST, OUTPUT_DIRS
+from ..config import OUTPUT_DIRS
 from ..logging_config import get_logger
 from ..services.database import Database
 from ..services.queries import QueryBuilder
@@ -149,4 +149,5 @@ def get_database_name_for_language(language: str) -> str:
         return pre_defined_db_mapping[language]
 
     mapping: Dict[str, str] = get_database_mapping()
+
     return mapping.get(language, "")

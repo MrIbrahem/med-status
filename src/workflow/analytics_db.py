@@ -3,7 +3,7 @@
 """
 from ..logging_config import get_logger
 from ..services.database import Database
-from .db_mapping import get_database_mapping
+from .db_mapping import get_database_name_for_language
 
 logger = get_logger(__name__)
 
@@ -39,8 +39,7 @@ class DatabaseAnalytics:
 
         site_code = site_code.lower().removesuffix("wiki")
 
-        db_mapping = get_database_mapping()
-        database = db_mapping.get(site_code) or f"{site_code}wiki_p"
+        database = get_database_name_for_language(site_code) or f"{site_code}wiki_p"
 
         host_name = database.removesuffix("_p")
         host = f"{host_name}.analytics.db.svc.wikimedia.cloud"
