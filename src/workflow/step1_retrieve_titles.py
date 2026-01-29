@@ -3,6 +3,7 @@ Step 1: Retrieve medicine titles
 """
 
 from typing import Any, Dict, List
+from tqdm import tqdm
 
 from ..config import OUTPUT_DIRS
 from ..logging_config import get_logger
@@ -13,27 +14,19 @@ logger = get_logger(__name__)
 
 
 def _organize_titles_by_language(results: List[Dict]) -> Dict[str, List[str]]:
-    """Organize query results by language."""
-    titles_by_language: Dict[str, List[str]] = {}
+    en_titles = set()
+    titles_by_language = {"en": []}
 
-    # Process langlinks
-    for row in results:
-        lang = row.get("ll_lang", "")
-        title = row.get("ll_title", "")
+    for x in tqdm(results, desc="Organizing titles by language", unit="rows"):
+        lang = x.get("ll_lang", "")
+        title = x.get("ll_title", "")
 
         if lang and title:
-            if lang not in titles_by_language:
-                titles_by_language[lang] = []
-            titles_by_language[lang].append(title)
+            titles_by_language.setdefault(lang, []).append(title)
 
-    # Add English titles
-    for row in results:
-        en_title = row.get("page_title", "")
-        if en_title:
-            if "en" not in titles_by_language:
-                titles_by_language["en"] = []
-            if en_title not in titles_by_language["en"]:
-                titles_by_language["en"].append(en_title)
+        en_titles.add(x.get("page_title", ""))
+
+    titles_by_language["en"] = list(en_titles)
 
     return titles_by_language
 

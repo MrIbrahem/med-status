@@ -1,12 +1,12 @@
 # Core dependencies
-pymysql==1.1.1
-cryptography==42.0.5
-
+pymysql>=1.1.1
+cryptography>=42.0.5
+tqdm>=4.67.1
 # Configuration
-python-dotenv==1.0.1
+python-dotenv>=1.0.1
 
 # Logging
-colorlog==6.8.2
+colorlog>=6.8.2
 
 # Type hints
-typing-extensions==4.11.0
+typing-extensions>=4.11.0
