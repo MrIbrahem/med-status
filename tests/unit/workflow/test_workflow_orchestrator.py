@@ -23,21 +23,27 @@ class TestWorkflowOrchestrator:
         # Mock database
         mock_db = MagicMock()
         mock_db.execute.return_value = [
-            {"lang": "en", "dbname": "enwiki_p"},
-            {"lang": "fr", "dbname": "frwiki_p"},
+            {"lang": "ar", "dbname": "arwiki"},
+            {"lang": "fr", "dbname": "frwiki"},
         ]
 
         mock_db_context = mocker.Mock()
         mock_db_context.__enter__ = mocker.Mock(return_value=mock_db)
         mock_db_context.__exit__ = mocker.Mock(return_value=None)
 
+        mocker.patch("src.services.db_mapping.save_db_mapping", return_value={})
+        mocker.patch("src.services.db_mapping.load_db_mapping", return_value={})
         mocker.patch("src.services.db_mapping.Database", return_value=mock_db_context)
+        # mocker.patch("src.workflow.get_database_mapping", return_value=mock_db_context)
 
         orchestrator = WorkflowOrchestrator()
         mapping = orchestrator.get_database_mapping()
 
-        assert mapping["en"] == "enwiki"
+        assert mapping["ar"] == "arwiki"
         assert mapping["fr"] == "frwiki"
+
+        # get_database_mapping added 'en' by default
+        assert mapping["en"] == "enwiki"
 
     # @pytest.mark.skip(reason="AssertionError: KeyError: 'Editor1'")
     def test_process_languages(self, mocker):

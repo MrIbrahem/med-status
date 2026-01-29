@@ -82,8 +82,6 @@ def fetch_database_mapping() -> Dict[str, str]:
 
         logger.info("✓ Retrieved mappings for %d languages", len(mapping))
 
-    # Ensure English value to avoid ("en", "testwiki", "https://test.wikipedia.org") entry
-    mapping["en"] = "enwiki"
     return mapping
 
 
@@ -98,12 +96,16 @@ def get_database_mapping() -> Dict[str, str]:
     Example:
         >>> orchestrator = WorkflowOrchestrator()
         >>> mapping = orchestrator.get_database_mapping()
-        >>> # Returns: {"en": "enwiki_p", "fr": "frwiki_p", ...}
+        >>> # Returns: {"en": "enwiki", "fr": "frwiki", ...}
     """
 
     mapping: Dict[str, str] = load_db_mapping()
     if not mapping:
         mapping = fetch_database_mapping()
+
+    if mapping:
+        # Ensure English value to avoid ("en", "testwiki", "https://test.wikipedia.org") entry
+        mapping["en"] = "enwiki"
         save_db_mapping(mapping)
 
     return mapping
