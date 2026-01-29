@@ -61,7 +61,7 @@ class TestWorkflowOrchestrator:
         mocker.patch("src.workflow.step1_retrieve_titles.DatabaseAnalytics", return_value=mock_db_context)
         mocker.patch("src.services.processor.DatabaseAnalytics", return_value=mock_db_context)
         mocker.patch("src.workflow.step2_process_languages.get_available_languages", return_value=["en"])
-        mocker.patch("src.workflow.step2_process_languages.load_language_titles", return_value=["Medicine"])
+        mocker.patch("src.workflow.step2_process_languages.load_language_titles_safe", return_value=["Medicine"])
 
         # Mock processor - patch at the module level where it's used
         mock_processor = mocker.Mock()
