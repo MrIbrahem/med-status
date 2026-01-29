@@ -33,13 +33,15 @@ def is_ip_address(text: str) -> bool:
         >>> is_ip_address("Username")
         False
     """
+    # temporary accounts: ~2025-16569-5
+    temp_account_pattern = r"^~\d{4}[\d\-]+$"
     # IPv4 pattern
     ipv4_pattern = r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$"
 
     # IPv6 pattern (simplified)
     ipv6_pattern = r"^([0-9a-fA-F]{0,4}:){7}[0-9a-fA-F]{0,4}$"
 
-    return bool(re.match(ipv4_pattern, text) or re.match(ipv6_pattern, text))
+    return bool(re.match(ipv4_pattern, text) or re.match(ipv6_pattern, text) or re.match(temp_account_pattern, text))
 
 
 def escape_title(title: str) -> str:

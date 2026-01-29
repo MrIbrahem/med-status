@@ -6,15 +6,56 @@ reports from editor statistics.
 """
 
 import json
-from datetime import datetime
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict
 
 from ..config import OUTPUT_DIRS
 from ..logging_config import get_logger
-from ..utils import format_number
+from ..utils import is_ip_address, load_language_titles
 
 logger = get_logger(__name__)
+
+
+def work_all_editors(editors, last_year) -> str:
+
+    text = "{{:WPM:WikiProject Medicine/Top medical editors navigation}}\n"
+    text += f"{{{{Top medical editors by lang|{last_year}}}}}\n"
+
+    text += f"Numbers of {last_year}.\n"
+
+    txt_table = """{| class="sortable wikitable"\n!#\n"""
+    txt_table += """!User\n!Count at wiki\n!Wiki\n!Count global\n"""
+
+    targets = ""
+
+    for i, (user, ta) in enumerate(editors.items(), start=1):
+        count_global = ta["count_global"]
+        count = ta["count"]
+        wiki = ta["site"]
+        user = user.replace("_", " ")
+        # #{{#target:User:{User}|{wiki}.wikipedia.org}}
+        targets += f"#{{{{#target:User:{user}|{wiki}.wikipedia.org}}}}\n"
+        txt_table += (
+            f"|-\n" f"!{i}\n" f"|[[:w:{wiki}:user:{user}|{user}]]\n" f"|{count:,}\n" f"|{wiki}\n" f"|{count_global:,}\n"
+        )
+        if count < 10:
+            break
+
+    txt_table += "\n|}"
+
+    text += '{| class="sortable wikitable floatright"\n|\n'
+    text += '<div style="max-height:250px; overflow: auto;vertical-align:top;font-size:90%;max-width:400px">\n'
+    text += "<pre>\n"
+
+    text += targets
+
+    text += "\n</pre>"
+    text += "\n</div>"
+    text += "\n|-\n|}"
+    text += f"\n==users==\n{txt_table}"
+
+    return text
 
 
 class ReportGenerator:
@@ -68,14 +109,6 @@ class ReportGenerator:
             editors: Dictionary mapping editor names to edit counts
             year: Year of the report
 
-        Example output:
-            == Editors Statistics for 2024 ==
-            Total editors: 150
-
-            {| class="wikitable sortable"
-            ! Rank !! Editor !! Edits
-            |-
-            | 1 || Editor1 || 1,234
             ...
         """
         logger.info("Generating report for language: %s", lang)
@@ -83,25 +116,31 @@ class ReportGenerator:
         output_file = Path(OUTPUT_DIRS["reports"]) / f"{lang}.wiki"
 
         # Sort editors by edit count (descending)
-        sorted_editors = sorted(editors.items(), key=lambda x: x[1], reverse=True)
+        sorted_editors = dict(sorted(editors.items(), key=lambda x: x[1], reverse=True))
+
+        text = "{{:WPM:WikiProject Medicine/Top medical editors navigation}}\n"
+        text += f"{{{{Top medical editors by lang|{year}}}}}\n"
+        # ---
+        links = len(load_language_titles(lang, OUTPUT_DIRS["languages"]))
+        # ---
+        if lang != "ar":
+            text += f"Numbers of {year}. There are {links:,} articles in {lang}\n"
+        # ---
+        text += """{| class="sortable wikitable"\n!#\n!User\n!Count\n|-"""
+        # ---
+        for i, (user, count) in enumerate(sorted_editors.items(), start=1):
+            # ---
+            user = user.replace("_", " ")
+            # ---
+            text += f"\n|-\n!{i}\n|[[:w:{lang}:user:{user}|{user}]]\n|{count:,}"
+            # ---
+            if i == 100:
+                break
+        # ---
+        text += "\n|}"
 
         with open(output_file, "w", encoding="utf-8") as f:
-            # Header
-            f.write(f"== Editors Statistics for {year} ==\n")
-            f.write(f"Total editors: {format_number(len(editors))}\n\n")
-
-            # Table
-            f.write('{| class="wikitable sortable"\n')
-            f.write("! Rank !! Editor !! Edits\n")
-
-            for rank, (editor, count) in enumerate(sorted_editors, 1):
-                f.write("|-\n")
-                f.write(f"| {rank} || {editor} || {format_number(count)}\n")
-
-            f.write("|}\n")
-
-            # Footer
-            f.write(f"\n''Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC''\n")
+            f.write(text)
 
         logger.info("✓ Generated report: %s", output_file)
 
@@ -112,78 +151,44 @@ class ReportGenerator:
         Args:
             all_editors: Dictionary mapping language codes to editor dictionaries
             year: Year of the report
-
-        Example output:
-            == Global Medicine Editor Statistics for 2024 ==
-
-            === Summary ===
-            * Total languages: 50
-            * Total unique editors: 5,432
-            * Total edits: 123,456
-
-            === Top 100 Editors Globally ===
-            ...
         """
         logger.info("Generating global report")
 
         output_file = Path(OUTPUT_DIRS["reports"]) / "total_report.wiki"
 
         # Aggregate all editors
-        global_editors: Dict[str, int] = {}
-        total_edits = 0
+        global_editors: Dict[str, int] = defaultdict(int)
+        editors_by_wiki: Dict[str, int] = defaultdict(lambda: defaultdict(int))
 
         for lang, editors in all_editors.items():
             for editor, count in editors.items():
-                if editor in global_editors:
-                    global_editors[editor] += count
-                else:
-                    global_editors[editor] = count
-                total_edits += count
+                if ">" in editor:
+                    # en>Jako96 -> Jako96
+                    editor = editor.split(">", 1)[1]
+
+                if is_ip_address(editor):
+                    continue  # Skip IP addresses
+
+                global_editors[editor] += count
+                editors_by_wiki[editor][lang] += count
 
         # Sort by total edit count
         sorted_global = sorted(global_editors.items(), key=lambda x: x[1], reverse=True)
+        all_editors_status: Dict[str, Dict[str, int]] = {}
 
+        for rank, (editor, count) in enumerate(sorted_global[:1000], 1):
+            editor_most_wiki = max(editors_by_wiki[editor].items(), key=lambda x: x[1])
+            all_editors_status[editor] = {
+                "count": editor_most_wiki[1],
+                "site": editor_most_wiki[0],
+                "count_global": count,
+            }
+
+        all_editors_status = dict(sorted(all_editors_status.items(), key=lambda x: x[1]["count"], reverse=True))
+
+        text = work_all_editors(all_editors_status, year)
         with open(output_file, "w", encoding="utf-8") as f:
             # Header
-            f.write(f"== Global Medicine Editor Statistics for {year} ==\n\n")
-
-            # Summary
-            f.write("=== Summary ===\n")
-            f.write(f"* Total languages: {format_number(len(all_editors))}\n")
-            f.write(f"* Total unique editors: {format_number(len(global_editors))}\n")
-            f.write(f"* Total edits: {format_number(total_edits)}\n\n")
-
-            # Top 100 editors
-            f.write("=== Top 100 Editors Globally ===\n")
-            f.write('{| class="wikitable sortable"\n')
-            f.write("! Rank !! Editor !! Total Edits\n")
-
-            for rank, (editor, count) in enumerate(sorted_global[:100], 1):
-                f.write("|-\n")
-                f.write(f"| {rank} || {editor} || {format_number(count)}\n")
-
-            f.write("|}\n")
-
-            # Language breakdown
-            f.write("\n=== Per-Language Statistics ===\n")
-            f.write('{| class="wikitable sortable"\n')
-            f.write("! Language !! Editors !! Total Edits\n")
-
-            # Sort languages by total edits
-            lang_stats = []
-            for lang, editors in all_editors.items():
-                lang_total = sum(editors.values())
-                lang_stats.append((lang, len(editors), lang_total))
-
-            lang_stats.sort(key=lambda x: x[2], reverse=True)
-
-            for lang, editor_count, edit_count in lang_stats:
-                f.write("|-\n")
-                f.write(f"| {lang} || {format_number(editor_count)} || {format_number(edit_count)}\n")
-
-            f.write("|}\n")
-
-            # Footer
-            f.write(f"\n''Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC''\n")
+            f.write(text)
 
         logger.info("✓ Generated global report: %s", output_file)
