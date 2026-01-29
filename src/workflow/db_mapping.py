@@ -107,3 +107,46 @@ def get_database_mapping() -> Dict[str, str]:
         save_db_mapping(mapping)
 
     return mapping
+
+
+def get_database_name_for_language(language: str) -> str:
+    """
+    Get the database name for a specific language code.
+    Args:
+        language (str): The language code to look up.
+    Returns:
+        str: The corresponding database name, or an empty string if not found.
+    Example:
+        >>> db_name = get_database_name_for_language("en")
+        >>> print(db_name)
+        "enwiki_p"
+    """
+    pre_defined_db_mapping = {
+        "gsw": "alswiki",
+        "sgs": "bat_smgwiki",
+        "bat-smg": "bat_smgwiki",
+        "be-tarask": "be_x_oldwiki",
+        "bho": "bhwiki",
+        "cbk": "cbk_zamwiki",
+        "cbk-zam": "cbk_zamwiki",
+        "vro": "fiu_vrowiki",
+        "fiu-vro": "fiu_vrowiki",
+        "map-bms": "map_bmswiki",
+        "nds-nl": "nds_nlwiki",
+        "nb": "nowiki",
+        "rup": "roa_rupwiki",
+        "roa-rup": "roa_rupwiki",
+        "roa-tara": "roa_tarawiki",
+        "lzh": "zh_classicalwiki",
+        "zh-classical": "zh_classicalwiki",
+        "nan": "zh_min_nanwiki",
+        "zh-min-nan": "zh_min_nanwiki",
+        "yue": "zh_yuewiki",
+        "zh-yue": "zh_yuewiki",
+    }
+
+    if language in pre_defined_db_mapping:
+        return pre_defined_db_mapping[language]
+
+    mapping: Dict[str, str] = get_database_mapping()
+    return mapping.get(language, "")
