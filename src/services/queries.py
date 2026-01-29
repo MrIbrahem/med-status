@@ -34,15 +34,18 @@ class QueryBuilder:
             SQL query string
         """
         return """
-            SELECT page_title, ll_lang, ll_title
-            FROM page, langlinks, page_assessments, page_assessments_projects
-            WHERE pap_project_title = "Medicine"
-                AND pa_project_id = pap_project_id
-                AND pa_page_id = page_id
-                AND page_id = ll_from
+            SELECT
+                page_title,
+                ll_lang,
+                ll_title
+            FROM page
+            JOIN page_assessments ON pa_page_id = page_id
+            JOIN page_assessments_projects ON pa_project_id = pap_project_id
+            LEFT JOIN langlinks ON ll_from = page_id        # LEFT JOIN to include pages without langlinks
+            WHERE
+                pap_project_title = "Medicine"
                 AND page_is_redirect = 0
                 AND page_namespace = 0
-            # limit 1000
         """
 
     @staticmethod
@@ -91,7 +94,7 @@ class QueryBuilder:
             JOIN page ON rev_page = page_id
             WHERE page_title IN ('{titles_str}')
               AND page_namespace = 0
-              AND rev_timestamp LIKE '{year}%'
+              AND YEAR(rev_timestamp) = '{year}'
               AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
             GROUP BY actor_id
             ORDER BY count DESC
@@ -124,13 +127,13 @@ class QueryBuilder:
                     AND pap_project_title = "طب"
             )
                 AND page_namespace = 0
-                AND rev_timestamp LIKE %s
+                AND YEAR(rev_timestamp) = %s
                 AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%%bot%%'
             GROUP BY actor_id
             ORDER BY count DESC
             LIMIT 100
         """
-        params = [f"{year}%"]
+        params = [year]
         return query, params
 
     @staticmethod
@@ -171,11 +174,11 @@ class QueryBuilder:
                 WHERE page_namespace = 1
             )
                 AND page_namespace = 0
-                AND rev_timestamp LIKE %s
+                AND YEAR(rev_timestamp) = %s
                 AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%%bot%%'
             GROUP BY actor_id
             ORDER BY count DESC
             LIMIT 100
         """
-        params = [f"{year}%"]
+        params = [year]
         return query, params

@@ -8,7 +8,7 @@ from ..config import OUTPUT_DIRS
 from ..logging_config import get_logger
 from ..services import EditorProcessor, QueryBuilder, ReportGenerator
 from ..services.db_mapping import get_database_mapping
-from .step1_retrieve_titles import retrieve_medicine_titles
+from .step1_retrieve_titles import download_medicine_titles
 from .step2_process_languages import process_languages
 from .step3_generate_reports import generate_reports
 
@@ -38,19 +38,26 @@ class WorkflowOrchestrator:
     def get_database_mapping(self) -> dict:
         return get_database_mapping()
 
-    def process_languages(self, year: str, languages: Optional[List[str]] = None) -> dict:
+    def process_languages(
+        self, year: str, languages: Optional[List[str]] = None, sort_descending: bool = False
+    ) -> dict:
         """
         Process editor statistics for specified languages.
 
         Args:
             year: Year to analyze (e.g., "2024")
             languages: Optional list of specific languages to process
+            sort_descending: Whether to sort languages by titles in descending order
         Returns:
             Dictionary of all editors processed across languages
         """
-        return process_languages(year, languages)
+        return process_languages(year, languages, sort_descending=sort_descending)
 
-    def generate_reports(self, all_editors: Dict[str, Dict[str, int]], year: str) -> None:
+    def generate_reports(
+        self,
+        all_editors: Dict[str, Dict[str, int]],
+        year: str,
+    ) -> None:
         """
         Generate global summary report.
 
@@ -63,22 +70,26 @@ class WorkflowOrchestrator:
         """
         return generate_reports(all_editors, year)
 
-    def retrieve_medicine_titles(self) -> dict:
+    def download_medicine_titles(self) -> None:
         """
         Retrieve medicine-related article titles from enwiki.
-
-        Returns:
-            Dictionary mapping language codes to lists of medicine titles
         """
-        return retrieve_medicine_titles()
+        download_medicine_titles()
 
-    def run_complete_workflow(self, year: str, languages: Optional[List[str]] = None) -> int:
+    def run_complete_workflow(
+        self,
+        year: str,
+        languages: Optional[List[str]] = None,
+        skip_steps: Optional[List[int]] = None,
+        sort_desc: bool = True,
+    ) -> int:
         """
         Run the complete workflow from start to finish.
 
         Args:
             year: Year to analyze (e.g., "2024")
             languages: Optional list of specific languages to process
+            skip_steps: Optional list of workflow steps to skip
 
         Returns:
             Exit code (0 for success, 1 for failure)
@@ -88,13 +99,23 @@ class WorkflowOrchestrator:
             >>> exit_code = orchestrator.run_complete_workflow("2024")
         """
         # Step 1: Retrieve titles
-        self.retrieve_medicine_titles()
+        if not skip_steps or 1 not in skip_steps:
+            self.download_medicine_titles()
+        else:
+            logger.info("✓ Skipping Step 1: Retrieve Medicine article titles")
 
-        # Step 2: Process languages
-        all_editors = self.process_languages(year, languages)
+        if not skip_steps or 2 not in skip_steps:
+            # Step 2: Process languages
+            all_editors = self.process_languages(year, languages, sort_descending=sort_desc)
+        else:
+            logger.info("✓ Skipping Step 2: Process editor statistics for languages")
+            all_editors = {}
 
-        # Step 3: Generate global report
-        self.generate_reports(all_editors, year)
+        if not skip_steps or 3 not in skip_steps:
+            # Step 3: Generate global report
+            self.generate_reports(all_editors, year)
+        else:
+            logger.info("✓ Skipping Step 3: Generate reports")
 
         # Final summary
         logger.info("")

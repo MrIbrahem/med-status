@@ -1,12 +1,12 @@
 {
   "project": {
-    "name": "wikipedia-medicine",
+    "name": "med-status",
     "description": "Wikipedia Medicine project editor analysis tool",
     "version": "1.0.0",
     "language": "python",
     "python_version": "3.9+"
   },
-  
+
   "code_style": {
     "formatter": "black",
     "line_length": 120,
@@ -15,14 +15,14 @@
     "type_checker": "mypy",
     "docstring_style": "google"
   },
-  
+
   "testing": {
     "framework": "pytest",
     "coverage_threshold": 80,
     "markers": ["unit", "integration", "slow", "db", "network"],
     "mock_library": "pytest-mock"
   },
-  
+
   "database": {
     "driver": "pymysql",
     "charset": "utf8mb4",
@@ -33,7 +33,7 @@
     "max_connections": 5,
     "batch_size": 100
   },
-  
+
   "project_structure": {
     "source_directory": "src",
     "test_directory": "tests",
@@ -43,7 +43,7 @@
       "reports": "reports"
     }
   },
-  
+
   "modules": {
     "database": {
       "file": "src/database.py",
@@ -120,11 +120,11 @@
       ]
     }
   },
-  
+
   "workflow_steps": [
     {
       "step": 1,
-      "name": "retrieve_medicine_titles",
+      "name": "download_medicine_titles",
       "database": "enwiki_p",
       "output": "languages/{lang}.json",
       "description": "Query Medicine project articles and langlinks"
@@ -162,7 +162,7 @@
       "description": "Create global summary across all languages"
     }
   ],
-  
+
   "conventions": {
     "naming": {
       "functions": "snake_case",
@@ -189,7 +189,7 @@
       "timeout": 30
     }
   },
-  
+
   "special_cases": {
     "arabic_wikipedia": {
       "lang_code": "ar",
@@ -210,7 +210,7 @@
       "action": "skip these editors"
     }
   },
-  
+
   "logging": {
     "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     "levels": {
@@ -221,7 +221,7 @@
     },
     "file": "wikipedia_medicine.log"
   },
-  
+
   "dependencies": {
     "production": [
       "pymysql==1.1.1",
@@ -241,7 +241,7 @@
       "mypy==1.9.0"
     ]
   },
-  
+
   "claude_preferences": {
     "code_explanations": "explain complex logic inline",
     "type_hints": "always include for public functions",
@@ -252,14 +252,14 @@
     "security": "highlight potential SQL injection or connection leaks",
     "performance": "suggest optimizations for database queries"
   },
-  
+
   "common_prompts": {
     "debugging": "See .claude/prompts/debugging.md",
     "code_review": "See .claude/prompts/code_review.md",
     "refactoring": "See .claude/prompts/refactoring.md",
     "testing": "See .claude/prompts/testing.md"
   },
-  
+
   "reference_docs": {
     "architecture": ".claude/context/architecture.md",
     "database_schema": ".claude/context/database_schema.md",

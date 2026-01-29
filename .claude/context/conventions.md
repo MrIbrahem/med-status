@@ -116,7 +116,7 @@ class Database:
     def _connect(self):
         """Private method for internal use."""
         pass
-    
+
     def _load_credentials(self):
         """Private method for internal use."""
         pass
@@ -140,8 +140,8 @@ class Database:
 
 ```python
 def process_language(
-    lang: str, 
-    titles: List[str], 
+    lang: str,
+    titles: List[str],
     year: str
 ) -> Dict[str, int]:
     """Process a language and return editor statistics."""
@@ -187,29 +187,29 @@ def process_titles(titles: List[str]) -> Dict[str, int]:
 def get_editors(titles: List[str], year: str, batch_size: int = 100) -> Dict[str, int]:
     """
     Retrieve editor statistics for the given titles.
-    
+
     This function queries the database for all editors who made revisions
     to the specified articles during the given year. Results are batched
     to prevent query timeouts.
-    
+
     Args:
         titles: List of article titles to query (URL-encoded with underscores)
         year: Year to filter revisions (e.g., "2024")
         batch_size: Number of titles to process per query (default: 100)
-    
+
     Returns:
         Dictionary mapping editor usernames to their edit counts.
         Example: {"Editor1": 150, "Editor2": 75}
-    
+
     Raises:
         pymysql.err.OperationalError: If database connection fails
         ValueError: If titles list is empty
-    
+
     Note:
         - Bot accounts are automatically filtered out
         - IP addresses are excluded from results
         - Titles must be URL-encoded (spaces as underscores)
-    
+
     Example:
         >>> editors = get_editors(["Barack_Obama", "Python_(programming)"], "2024")
         >>> print(editors["JohnDoe"])
@@ -243,24 +243,24 @@ Example:
 class EditorProcessor:
     """
     Process and aggregate editor statistics.
-    
+
     This class handles the processing of editor data from database queries,
     including filtering of bot accounts and IP addresses, aggregation of
     edit counts, and batch processing of large title lists.
-    
+
     Attributes:
         batch_size: Number of titles to process per database query
         logger: Logger instance for this class
-    
+
     Example:
         >>> processor = EditorProcessor(batch_size=100)
         >>> editors = processor.process_language("es", titles, "eswiki", "2024")
     """
-    
+
     def __init__(self, batch_size: int = 100):
         """
         Initialize the EditorProcessor.
-        
+
         Args:
             batch_size: Number of titles per batch (default: 100)
         """
@@ -496,10 +496,10 @@ def test_process_language(mocker):
         {"actor_name": "User1", "count": 10},
         {"actor_name": "User2", "count": 5}
     ]
-    
+
     processor = EditorProcessor()
     result = processor.process_language("es", ["Title1"], "eswiki", "2024")
-    
+
     assert result == {"User1": 10, "User2": 5}
 ```
 
@@ -544,26 +544,26 @@ if __name__ == "__main__":
 ```python
 class MyClass:
     """Class docstring."""
-    
+
     # Class variables
     class_var = value
-    
+
     def __init__(self, param):
         """Initialize the instance."""
         # Instance variables
         self.param = param
         self._private_var = None
-    
+
     # Public methods
     def public_method(self):
         """Public method docstring."""
         pass
-    
+
     # Private methods
     def _private_method(self):
         """Private method docstring."""
         pass
-    
+
     # Special methods
     def __str__(self):
         """String representation."""
@@ -754,14 +754,14 @@ def process_titles(titles: List[str]) -> Dict[str, int]:
     """Process article titles."""
     if not titles:
         raise ValueError("Titles list cannot be empty")
-    
+
     if len(titles) > 10000:
         raise ValueError("Too many titles (max: 10000)")
-    
+
     for title in titles:
         if not isinstance(title, str):
             raise TypeError(f"Expected str, got {type(title)}")
-    
+
     # Process...
 ```
 

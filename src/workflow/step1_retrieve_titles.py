@@ -4,6 +4,8 @@ Step 1: Retrieve medicine titles
 
 from typing import Any, Dict, List
 
+from tqdm import tqdm
+
 from ..config import OUTPUT_DIRS
 from ..logging_config import get_logger
 from ..services import DatabaseAnalytics, QueryBuilder
@@ -13,29 +15,40 @@ logger = get_logger(__name__)
 
 
 def _organize_titles_by_language(results: List[Dict]) -> Dict[str, List[str]]:
-    """Organize query results by language."""
-    titles_by_language: Dict[str, List[str]] = {}
+    en_titles = set()
+    titles_by_language = {"en": []}
 
-    # Process langlinks
-    for row in results:
-        lang = row.get("ll_lang", "")
-        title = row.get("ll_title", "")
+    for x in tqdm(results, desc="Organizing titles by language", unit="rows"):
+        lang = x.get("ll_lang", "")
+        title = x.get("ll_title", "")
 
         if lang and title:
-            if lang not in titles_by_language:
-                titles_by_language[lang] = []
-            titles_by_language[lang].append(title)
+            titles_by_language.setdefault(lang, []).append(title)
 
-    # Add English titles
-    for row in results:
-        en_title = row.get("page_title", "")
-        if en_title:
-            if "en" not in titles_by_language:
-                titles_by_language["en"] = []
-            if en_title not in titles_by_language["en"]:
-                titles_by_language["en"].append(en_title)
+        en_titles.add(x.get("page_title", ""))
+
+    titles_by_language["en"] = list(en_titles)
 
     return titles_by_language
+
+
+def _save_language_summary_report(titles_by_language: Dict[str, List[str]]) -> None:
+    """
+    Save summary report of titles by language.
+    """
+    data = {lang: len(titles) for lang, titles in titles_by_language.items()}
+    data = dict(sorted(data.items(), key=lambda item: item[1], reverse=True))
+    output_file = OUTPUT_DIRS["reports"] / "language_titles_summary.wiki"
+
+    wiki_text = "Language Titles Summary:\n"
+    wiki_text += '{| class="wikitable"\n! Language !! Number of Titles\n'
+    for lang, count in data.items():
+        wiki_text += f"| {lang} || {count}\n"
+    wiki_text += "|}\n"
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(wiki_text)
+    logger.info(" ✓ Saved language titles summary report to %s", output_file.name)
 
 
 def _save_language_files(titles_by_language: Dict[str, List[str]]) -> None:
@@ -64,7 +77,7 @@ def fetch_medicine_titles() -> List[Dict[str, Any]]:
     return results
 
 
-def retrieve_medicine_titles() -> Dict[str, List[str]]:
+def download_medicine_titles() -> None:
     """
     Retrieve Medicine project articles with langlinks from enwiki.
 
@@ -73,7 +86,7 @@ def retrieve_medicine_titles() -> Dict[str, List[str]]:
 
     Example:
         >>> orchestrator = WorkflowOrchestrator()
-        >>> titles = orchestrator.retrieve_medicine_titles()
+        >>> titles = orchestrator.download_medicine_titles()
         >>> # Returns: {"en": ["Medicine"], "fr": ["Médecine"], ...}
     """
     logger.info("=" * 60)
@@ -85,12 +98,11 @@ def retrieve_medicine_titles() -> Dict[str, List[str]]:
 
     titles_by_language = _organize_titles_by_language(results)
     _save_language_files(titles_by_language)
+    _save_language_summary_report(titles_by_language)
 
     logger.info("✓ Found %d languages with %d total articles", len(titles_by_language), len(results))
 
-    return titles_by_language
-
 
 __all__ = [
-    "retrieve_medicine_titles",
+    "download_medicine_titles",
 ]

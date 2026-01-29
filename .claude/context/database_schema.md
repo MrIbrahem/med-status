@@ -59,10 +59,10 @@ CREATE TABLE page (
 
 **Example Query:**
 ```sql
-SELECT page_title, page_id 
-FROM page 
-WHERE page_namespace = 0 
-  AND page_is_redirect = 0 
+SELECT page_title, page_id
+FROM page
+WHERE page_namespace = 0
+  AND page_is_redirect = 0
 LIMIT 10;
 ```
 
@@ -191,7 +191,7 @@ CREATE TABLE revision (
 
 **Usage in Project:**
 - Count edits per editor
-- Filter by year: `rev_timestamp LIKE '2024%'`
+- Filter by year: `YEAR(rev_timestamp) = 2024`
 - Join with `page` on `rev_page = page_id`
 - Join with `actor` on `rev_actor = actor_id`
 
@@ -200,7 +200,7 @@ CREATE TABLE revision (
 SELECT COUNT(*) as edit_count
 FROM revision
 WHERE rev_page = 12345
-  AND rev_timestamp LIKE '2024%';
+  AND YEAR(rev_timestamp) = 2024;
 ```
 
 ---
@@ -383,7 +383,7 @@ JOIN actor ON rev_actor = actor_id
 JOIN page ON rev_page = page_id
 WHERE page_title IN ('Title1', 'Title2', ...)
   AND page_namespace = 0
-  AND rev_timestamp LIKE '2024%'
+  AND YEAR(rev_timestamp) = 2024
   AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
 GROUP BY actor_id
 ORDER BY count DESC;
@@ -393,7 +393,7 @@ ORDER BY count DESC;
 
 **Returns**: Editor name, edit count
 
-**Notes**: 
+**Notes**:
 - Batch titles (100 at a time)
 - Escape titles with `pymysql.converters.escape_string()`
 
@@ -413,7 +413,7 @@ WHERE page_id IN (
     WHERE pap_project_title = "طب"
   )
   AND page_namespace = 0
-  AND rev_timestamp LIKE '2024%'
+  AND YEAR(rev_timestamp) = 2024
   AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
 GROUP BY actor_id
 ORDER BY count DESC
@@ -440,8 +440,8 @@ WHERE page_title IN (
     FROM (
       SELECT tl_from, rd_from
       FROM templatelinks
-      LEFT JOIN redirect 
-        ON rd_from = tl_from 
+      LEFT JOIN redirect
+        ON rd_from = tl_from
         AND rd_title = 'WikiProject_Medicine'
         AND (rd_interwiki = '' OR rd_interwiki IS NULL)
         AND rd_namespace = 10
@@ -455,7 +455,7 @@ WHERE page_title IN (
     WHERE page_namespace = 1  -- Talk pages
   )
   AND page_namespace = 0
-  AND rev_timestamp LIKE '2025%'
+  AND YEAR(rev_timestamp) = 2025
   AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
 GROUP BY actor_id
 ORDER BY count DESC
@@ -480,7 +480,7 @@ LIMIT 100;
 ### Timestamps
 - **Format**: BINARY(14) - YYYYMMDDHHmmss
 - **Example**: '20240115120000' = 2024-01-15 12:00:00
-- **Usage**: `rev_timestamp LIKE '2024%'` for year filtering
+- **Usage**: `YEAR(rev_timestamp) = 2024` for year filtering
 
 ### Namespaces
 - **0**: Main articles
@@ -558,19 +558,6 @@ query = f"WHERE page_title = '{title}'"
 escaped = pymysql.converters.escape_string(title)
 query = f"WHERE page_title = '{escaped}'"
 ```
-
-### 4. Year Filtering
-
-❌ **Wrong**: Using date functions (slow)
-```sql
-WHERE YEAR(rev_timestamp) = 2024
-```
-
-✅ **Correct**: Using LIKE (fast)
-```sql
-WHERE rev_timestamp LIKE '2024%'
-```
-
 ---
 
 ## Schema Changes & Maintenance

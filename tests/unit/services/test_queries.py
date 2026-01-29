@@ -37,7 +37,7 @@ class TestQueryBuilder:
         year = "2024"
         query, params = QueryBuilder.get_editors_arabic(year)
         assert "actor_name" in query
-        assert f"{year}%" in params
+        assert year in params
         assert "طب" in query
 
     def test_get_editors_english(self):
@@ -46,7 +46,7 @@ class TestQueryBuilder:
         query, params = QueryBuilder.get_editors_english(year)
         assert "actor_name" in query
         assert "WikiProject_Medicine" in query
-        assert f"{year}%" in params
+        assert year in params
 
     def test_sql_injection_prevention(self):
         """Test that titles are properly escaped."""

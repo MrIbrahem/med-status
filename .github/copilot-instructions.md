@@ -604,27 +604,6 @@ def get_database_mapping() -> Dict[str, str]:
 # This helps identify highly active editors
 velocity = total_edits / days_active
 
-# Use LIKE for year filtering instead of YEAR() for performance
-# The index on rev_timestamp supports LIKE but not YEAR()
-query = f"WHERE rev_timestamp LIKE '{year}%'"
-```
-
-### SQL Query Comments
-```python
-query = """
-    SELECT actor_name, COUNT(*) as count
-    FROM revision
-    JOIN actor ON rev_actor = actor_id  -- Link revisions to editors
-    JOIN page ON rev_page = page_id      -- Link revisions to pages
-    WHERE page_title IN (%(titles)s)
-      AND page_namespace = 0              -- Main article namespace only
-      AND rev_timestamp LIKE '2024%%'     -- Filter by year (uses index)
-      AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%%bot%%'  -- Exclude bots
-    GROUP BY actor_id
-    ORDER BY count DESC
-"""
-```
-
 ## Workflow Reference
 
 The application follows these steps:
@@ -663,14 +642,6 @@ The application follows these steps:
 
 **Initial Setup Sequence:**
 ```bash
-# 1. Create and activate virtual environment (ALWAYS do this first)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# 2. Install dependencies (use make for consistency)
-make install-dev
-# This runs: pip install -r requirements.txt && pip install -r requirements-dev.txt && pre-commit install
-
 # Alternative: Manual installation
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
@@ -946,15 +917,6 @@ git push --force-with-lease
 ```
 
 ## Troubleshooting Common Issues
-
-### Environment Issues
-
-**Issue: "ModuleNotFoundError" when running tests**
-```bash
-# Solution: Ensure virtual environment is activated and dependencies installed
-source venv/bin/activate
-make install-dev
-```
 
 **Issue: "Command not found: make"**
 ```bash

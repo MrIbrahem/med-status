@@ -251,7 +251,7 @@ sphinx-rtd-theme==2.0.0
 ```markdown
 # Wikipedia Medicine Project - Editor Analysis
 
-[![Tests](https://github.com/yourusername/wikipedia-medicine/actions/workflows/pytest.yml/badge.svg)](https://github.com/yourusername/wikipedia-medicine/actions/workflows/pytest.yml)
+[![Tests](https://github.com/MrIbrahem/med-status/actions/workflows/pytest.yml/badge.svg)](https://github.com/MrIbrahem/med-status/actions/workflows/pytest.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 
@@ -277,24 +277,17 @@ A Python application to retrieve and analyze editor contributions across Wikiped
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/wikipedia-medicine.git
-cd wikipedia-medicine
+git clone https://github.com/MrIbrahem/med-status.git
+cd med-status
 ```
 
-### 2. Create virtual environment
-
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-### 3. Install dependencies
+### 2. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure credentials
+### 3. Configure credentials
 
 Ensure your `~/replica.my.cnf` file exists with the following format:
 
@@ -336,7 +329,7 @@ python -m src.main --log-level DEBUG
 ## Project Structure
 
 ```
-wikipedia-medicine/
+med-status/
 ├── src/
 │   ├── __init__.py
 │   ├── main.py              # Entry point
@@ -548,7 +541,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For issues and questions:
 
-- Open an issue on [GitHub](https://github.com/yourusername/wikipedia-medicine/issues)
+- Open an issue on [GitHub](https://github.com/MrIbrahem/med-status/issues)
 - Contact the maintainers
 
 ## Roadmap
@@ -570,7 +563,7 @@ If you use this tool in your research, please cite:
   author = {Your Name},
   title = {Wikipedia Medicine Editor Analysis},
   year = {2025},
-  url = {https://github.com/yourusername/wikipedia-medicine}
+  url = {https://github.com/MrIbrahem/med-status}
 }
 ```
 ```
@@ -666,7 +659,7 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "wikipedia-medicine"
+name = "med-status"
 version = "1.0.0"
 description = "Wikipedia Medicine project editor analysis tool"
 readme = "README.md"
@@ -682,8 +675,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/wikipedia-medicine"
-Issues = "https://github.com/yourusername/wikipedia-medicine/issues"
+Homepage = "https://github.com/MrIbrahem/med-status"
+Issues = "https://github.com/MrIbrahem/med-status/issues"
 
 [tool.black]
 line-length = 120
@@ -849,7 +842,7 @@ Thank you for your interest in contributing! This document provides guidelines f
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/yourusername/wikipedia-medicine.git`
+2. Clone your fork: `git clone https://github.com/MrIbrahem/med-status.git`
 3. Create a branch: `git checkout -b feature/your-feature-name`
 4. Make your changes
 5. Run tests: `pytest`

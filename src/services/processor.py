@@ -60,31 +60,32 @@ class EditorProcessor:
             # Standard query for other languages
             query, params = self.query_builder.get_editors_standard(titles, year)
 
+        results = []
         try:
             with DatabaseAnalytics(lang) as db:
                 results = db.execute(query, params=params)
 
-                for row in results:
-                    actor_name = row.get("actor_name", "")
-                    count = row.get("count", 0)
-
-                    # Filter out IP addresses
-                    if is_ip_address(actor_name):
-                        logger.debug("Skipped IP address: %s", actor_name)
-                        continue
-
-                    # Filter out bot accounts (additional check)
-                    if "bot" in actor_name.lower():
-                        logger.debug("Skipped bot account: %s", actor_name)
-                        continue
-
-                    editors[actor_name] = count
-
-                logger.info("✓ Language '%s' complete: %d editors found", lang, len(editors))
-
         except Exception as e:
             logger.error("Failed to process language %s: %s", lang, str(e), exc_info=True)
             raise
+
+        for row in results:
+            actor_name = row.get("actor_name", "")
+            count = row.get("count", 0)
+
+            # Filter out IP addresses
+            if is_ip_address(actor_name):
+                logger.debug("Skipped IP address: %s", actor_name)
+                continue
+
+            # Filter out bot accounts (additional check)
+            if "bot" in actor_name.lower():
+                logger.debug("Skipped bot account: %s", actor_name)
+                continue
+
+            editors[actor_name] = count
+
+            logger.info("✓ Language '%s' complete: %d editors found", lang, len(editors))
 
         return editors
 

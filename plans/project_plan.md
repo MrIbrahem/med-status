@@ -90,7 +90,7 @@ JOIN actor ON rev_actor = actor_id
 JOIN page ON rev_page = page_id
 WHERE lower(cast(actor_name as CHAR)) NOT LIKE '%bot%'
   AND page_namespace = 0
-  AND rev_timestamp LIKE '{last_year}%'
+  AND YEAR(rev_timestamp) = {last_year}
   AND page_id IN (
     SELECT page_id
     FROM page
@@ -116,7 +116,7 @@ JOIN actor ON rev_actor = actor_id
 JOIN page ON rev_page = page_id
 WHERE lower(cast(actor_name as CHAR)) NOT LIKE '%bot%'
   AND page_namespace = 0
-  AND rev_timestamp LIKE '{last_year}%'
+  AND YEAR(rev_timestamp) = {last_year}
   AND page_id IN (
     SELECT DISTINCT pa_page_id
     FROM page_assessments, page_assessments_projects
@@ -137,7 +137,7 @@ JOIN actor ON rev_actor = actor_id
 JOIN page ON rev_page = page_id
 WHERE lower(cast(actor_name as CHAR)) NOT LIKE '%bot%'
   AND page_namespace = 0
-  AND rev_timestamp LIKE '2025%'
+  AND YEAR(rev_timestamp) = 2025
   AND page_title IN (
     SELECT page_title
     FROM (

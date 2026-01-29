@@ -20,7 +20,7 @@ Before starting implementation, review:
 ## Project Structure (Updated)
 
 ```
-wikipedia-medicine/
+med-status/
 ├── src/
 │   ├── __init__.py
 │   ├── main.py                    # Entry point with CLI
@@ -814,7 +814,7 @@ class QueryBuilder:
             JOIN page ON rev_page = page_id
             WHERE page_title IN ('{titles_str}')
               AND page_namespace = 0
-              AND rev_timestamp LIKE '{year}%'
+              AND YEAR(rev_timestamp) = {year}
               AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
             GROUP BY actor_id
             ORDER BY count DESC
@@ -845,7 +845,7 @@ class QueryBuilder:
                   AND pap_project_title = "طب"
             )
               AND page_namespace = 0
-              AND rev_timestamp LIKE '{year}%'
+              AND YEAR(rev_timestamp) = {year}
               AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
             GROUP BY actor_id
             ORDER BY count DESC
@@ -890,7 +890,7 @@ class QueryBuilder:
                 WHERE page_namespace = 1
             )
               AND page_namespace = 0
-              AND rev_timestamp LIKE '{year}%'
+              AND YEAR(rev_timestamp) = {year}
               AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
             GROUP BY actor_id
             ORDER BY count DESC
@@ -947,9 +947,7 @@ Each with:
 ```bash
 # 1. Setup
 git clone <repo>
-cd wikipedia-medicine
-python -m venv venv
-source venv/bin/activate
+cd med-status
 pip install -r requirements-dev.txt
 pre-commit install
 

@@ -141,6 +141,18 @@ def load_language_titles(lang: str, input_dir: str = "languages") -> List[str]:
     return titles
 
 
+def load_language_titles_safe(lang: str, input_dir: str = "languages") -> List[str]:
+    """
+    Load article titles for a language from JSON file, returning empty list if file not found.
+    """
+    try:
+        return load_language_titles(lang, input_dir)
+
+    except FileNotFoundError:
+        logger.warning("Language file not found: %s", lang)
+        return []
+
+
 def get_available_languages(input_dir: str = "languages") -> List[str]:
     """
     Get list of available language codes from the languages directory.

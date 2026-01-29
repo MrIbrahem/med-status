@@ -1,6 +1,6 @@
 # Wikipedia Medicine Project - Editor Analysis
 
-[![Tests](https://github.com/yourusername/wikipedia-medicine/actions/workflows/pytest.yml/badge.svg)](https://github.com/yourusername/wikipedia-medicine/actions/workflows/pytest.yml)
+[![Tests](https://github.com/MrIbrahem/med-status/actions/workflows/pytest.yml/badge.svg)](https://github.com/MrIbrahem/med-status/actions/workflows/pytest.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 
@@ -26,24 +26,17 @@ A Python application to retrieve and analyze editor contributions across Wikiped
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/wikipedia-medicine.git
-cd wikipedia-medicine
+git clone https://github.com/MrIbrahem/med-status.git
+cd med-status
 ```
 
-### 2. Create virtual environment
-
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-### 3. Install dependencies
+### 2. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure credentials
+### 3. Configure credentials
 
 Ensure your `~/replica.my.cnf` file exists with the following format:
 
@@ -60,32 +53,33 @@ password=your_password
 Run the complete analysis:
 
 ```bash
-python -m src.main
+python start.py
 ```
 
 ### Advanced Options
 
 ```bash
 # Process specific languages only
-python -m src.main --languages es,fr,de
+python start.py --languages es,fr,de
 
 # Set custom year
-python -m src.main --year 2024
+python start.py --year 2024
 
 # Skip title retrieval (use existing data)
-python -m src.main --skip-titles
+python start.py --skip-titles
 
 # Generate reports only
-python -m src.main --reports-only
+python start.py --reports-only
 
 # Enable debug logging
-python -m src.main --log-level DEBUG
+python start.py --log-level DEBUG
 ```
 
 ## Project Structure
 
 ```
-wikipedia-medicine/
+med-status/
+├── start.py                 # Entry point
 ├── src/
 │   ├── __init__.py
 │   ├── services/
@@ -99,7 +93,6 @@ wikipedia-medicine/
 │   │   ├── step1_retrieve_titles.py
 │   │   ├── step2_process_languages.py
 │   │   └── step3_generate_reports.py
-│   ├── main.py              # Entry point
 │   ├── config.py            # Configuration
 │   └── utils.py             # Helper functions
 ├── tests/
@@ -304,7 +297,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For issues and questions:
 
-- Open an issue on [GitHub](https://github.com/yourusername/wikipedia-medicine/issues)
+- Open an issue on [GitHub](https://github.com/MrIbrahem/med-status/issues)
 - Contact the maintainers
 
 ## Roadmap
@@ -326,6 +319,6 @@ If you use this tool in your research, please cite:
   author = {Your Name},
   title = {Wikipedia Medicine Editor Analysis},
   year = {2025},
-  url = {https://github.com/yourusername/wikipedia-medicine}
+  url = {https://github.com/MrIbrahem/med-status}
 }
 ```

@@ -495,10 +495,8 @@ except Exception as e:
 ### Installation
 
 ```bash
-git clone https://github.com/user/wikipedia-medicine.git
-cd wikipedia-medicine
-python -m venv venv
-source venv/bin/activate
+git clone https://github.com/MrIbrahem/med-status.git
+cd med-status
 pip install -r requirements.txt
 ```
 
