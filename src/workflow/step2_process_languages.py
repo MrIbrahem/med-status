@@ -78,7 +78,7 @@ def _process_titles_for_language(
     return editors
 
 
-def gather_language_titles(languages_to_process: List[str]) -> dict[str, list[str]]:
+def gather_language_titles(languages_to_process: List[str], sort_descending: bool = False) -> dict[str, list[str]]:
     """
     Gather titles for all languages to process.
 
@@ -93,6 +93,10 @@ def gather_language_titles(languages_to_process: List[str]) -> dict[str, list[st
         titles: List[str] = load_language_titles_safe(lang, OUTPUT_DIRS["languages"])
         languages_titles[lang] = titles
 
+    languages_titles = dict(
+        sorted(languages_titles.items(), key=lambda item: len(item[1]), reverse=sort_descending)
+    )
+
     return languages_titles
 
 
@@ -100,6 +104,7 @@ def process_languages(
     year: str,
     languages: Optional[List[str]] = None,
     batch_size: int = BATCH_SIZE,
+    sort_descending: bool = False,
 ) -> Dict[str, Dict[str, int]]:
     """
     Process editor statistics for all or specified languages.
@@ -123,7 +128,7 @@ def process_languages(
 
     logger.info("Processing %d languages", len(languages_to_process))
 
-    languages_titles: dict[str, list[str]] = gather_language_titles(languages_to_process)
+    languages_titles: dict[str, list[str]] = gather_language_titles(languages_to_process, sort_descending=sort_descending)
 
     all_editors: Dict[str, Dict[str, int]] = {}
 

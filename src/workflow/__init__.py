@@ -38,19 +38,24 @@ class WorkflowOrchestrator:
     def get_database_mapping(self) -> dict:
         return get_database_mapping()
 
-    def process_languages(self, year: str, languages: Optional[List[str]] = None) -> dict:
+    def process_languages(self, year: str, languages: Optional[List[str]] = None, sort_descending: bool = False) -> dict:
         """
         Process editor statistics for specified languages.
 
         Args:
             year: Year to analyze (e.g., "2024")
             languages: Optional list of specific languages to process
+            sort_descending: Whether to sort languages by titles in descending order
         Returns:
             Dictionary of all editors processed across languages
         """
-        return process_languages(year, languages)
+        return process_languages(year, languages, sort_descending=sort_descending)
 
-    def generate_reports(self, all_editors: Dict[str, Dict[str, int]], year: str) -> None:
+    def generate_reports(
+        self,
+        all_editors: Dict[str, Dict[str, int]],
+        year: str,
+    ) -> None:
         """
         Generate global summary report.
 
@@ -99,7 +104,7 @@ class WorkflowOrchestrator:
 
         if not skip_steps or 2 not in skip_steps:
             # Step 2: Process languages
-            all_editors = self.process_languages(year, languages)
+            all_editors = self.process_languages(year, languages, sort_descending=sort_desc)
         else:
             logger.info("✓ Skipping Step 2: Process editor statistics for languages")
             all_editors = {}
