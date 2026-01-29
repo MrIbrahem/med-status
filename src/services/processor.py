@@ -115,7 +115,7 @@ class EditorProcessor:
         with DatabaseAnalytics(lang) as db:
             batches = self._batch_titles(titles, batch_size)
             for batch_num, batch in enumerate(batches, 1):
-                logger.debug("Processing batch %d/%d", batch_num, len(batches))
+                logger.info("Processing batch %d/%d", batch_num, len(batches))
                 query, params = self.query_builder.get_editors_standard(batch, year)
 
                 try:
