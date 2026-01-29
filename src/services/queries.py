@@ -42,7 +42,7 @@ class QueryBuilder:
                 AND page_id = ll_from
                 AND page_is_redirect = 0
                 AND page_namespace = 0
-            limit 1000
+            # limit 1000
         """
 
     @staticmethod
