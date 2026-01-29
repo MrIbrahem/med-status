@@ -34,15 +34,18 @@ class QueryBuilder:
             SQL query string
         """
         return """
-            SELECT page_title, ll_lang, ll_title
-            FROM page, langlinks, page_assessments, page_assessments_projects
-            WHERE pap_project_title = "Medicine"
-                AND pa_project_id = pap_project_id
-                AND pa_page_id = page_id
-                AND page_id = ll_from
+            SELECT
+                page_title,
+                ll_lang,
+                ll_title
+            FROM page
+            JOIN page_assessments ON pa_page_id = page_id
+            JOIN page_assessments_projects ON pa_project_id = pap_project_id
+            LEFT JOIN langlinks ON ll_from = page_id        # LEFT JOIN to include pages without langlinks
+            WHERE
+                pap_project_title = "Medicine"
                 AND page_is_redirect = 0
                 AND page_namespace = 0
-            # limit 1000
         """
 
     @staticmethod
