@@ -118,7 +118,7 @@ class ReportGenerator:
         text = "{{:WPM:WikiProject Medicine/Total medical articles}}\n"
         text += f"{{{{Top medical editors by lang|{year}}}}}\n"
         # ---
-        links = len(load_language_titles(lang, OUTPUT_DIRS["titles"]))
+        links = len(load_language_titles(lang, OUTPUT_DIRS["languages"]))
         # ---
         if lang != "ar":
             text += f"Numbers of {year}. There are {links:,} articles in {lang}\n"
