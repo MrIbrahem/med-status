@@ -3,11 +3,12 @@ Step 2: Process languages
 """
 
 from typing import Dict, List, Optional
+from tqdm import tqdm
 
 from ..config import BATCH_SIZE, OUTPUT_DIRS
 from ..logging_config import get_logger
 from ..services import EditorProcessor, QueryBuilder, ReportGenerator
-from ..utils import get_available_languages, load_language_titles
+from ..utils import get_available_languages, load_language_titles_safe
 
 logger = get_logger(__name__)
 
@@ -33,11 +34,10 @@ def _process_single_language(
     lang: str,
     year: str,
     batch_size: int,
+    titles: List[str],
 ) -> Dict[str, int]:
     """Process a single language."""
     report_generator = ReportGenerator()
-
-    titles = load_language_titles(lang, OUTPUT_DIRS["languages"])
 
     editors = _process_titles_for_language(lang, titles, year, batch_size)
 
@@ -78,8 +78,27 @@ def _process_titles_for_language(
     return editors
 
 
+def gather_language_titles(languages_to_process) -> dict:
+    """
+    Gather titles for all languages to process.
+
+    Args:
+        languages_to_process: List of language codes to process
+
+    Returns:
+        Dictionary mapping language codes to their article titles
+    """
+    languages_titles = {}
+    for lang in tqdm(languages_to_process, desc="Loading language titles"):
+        titles = load_language_titles_safe(lang, OUTPUT_DIRS["languages"])
+        languages_titles[lang] = titles
+    return languages_titles
+
+
 def process_languages(
-    year: str, languages: Optional[List[str]] = None, batch_size: int = BATCH_SIZE
+    year: str,
+    languages: Optional[List[str]] = None,
+    batch_size: int = BATCH_SIZE,
 ) -> Dict[str, Dict[str, int]]:
     """
     Process editor statistics for all or specified languages.
@@ -103,14 +122,15 @@ def process_languages(
 
     logger.info("Processing %d languages", len(languages_to_process))
 
+    languages_titles = gather_language_titles(languages_to_process)
+
     all_editors: Dict[str, Dict[str, int]] = {}
 
-    for i, lang in enumerate(languages_to_process, 1):
-        logger.info("")
+    for i, (lang, titles) in enumerate(languages_titles.items(), 1):
         logger.info("-" * 60)
-        logger.info("Language %d/%d: %s", i, len(languages_to_process), lang)
+        logger.info("Language %d/%d: %s", i, len(languages_titles), lang)
         logger.info("-" * 60)
-        lang_editors = _process_single_language(lang, year, batch_size)
+        lang_editors = _process_single_language(lang, year, batch_size, titles)
         if lang_editors:
             all_editors[lang] = lang_editors
 
