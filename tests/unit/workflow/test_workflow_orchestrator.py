@@ -76,13 +76,13 @@ class TestWorkflowOrchestrator:
         mocker.patch("src.workflow.step2_process_languages.get_available_languages", return_value=["en"])
         mocker.patch("src.workflow.step2_process_languages.load_language_titles_safe", return_value=["Medicine"])
 
-        # Mock processor - patch at the module level where it's used
-        mock_processor = mocker.Mock()
-        mock_processor.process_language.return_value = {"Editor1": 100}
-        mocker.patch("src.workflow.step2_process_languages.processor", mock_processor)
+        # Mock processor methods - patch at the class level
+        mocker.patch("src.services.processor.EditorProcessor.process_language_ar_en", return_value={"Editor1": 100})
+        mocker.patch("src.services.processor.EditorProcessor.process_language_patch", return_value={"Editor1": 100})
 
-        # Mock report generator
+        # Mock report generator methods
         mock_report_gen = mocker.Mock()
+        mock_report_gen.load_editors_json.return_value = None
         mocker.patch("src.workflow.step2_process_languages.ReportGenerator", return_value=mock_report_gen)
 
         orchestrator = WorkflowOrchestrator()
