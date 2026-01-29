@@ -5,7 +5,7 @@ This module provides the EditorProcessor class for processing and
 aggregating editor statistics from Wikipedia databases.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from ..logging_config import get_logger
 from ..utils import is_ip_address

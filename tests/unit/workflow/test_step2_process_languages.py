@@ -73,9 +73,7 @@ class TestProcessTitlesForLanguage:
 
     def test_process_titles_other_language(self, mocker):
         """Test processing other language (uses patch method)."""
-        mocker.patch(
-            "src.services.processor.EditorProcessor.process_language_patch", return_value={"Editor2": 50}
-        )
+        mocker.patch("src.services.processor.EditorProcessor.process_language_patch", return_value={"Editor2": 50})
 
         result = _process_titles_for_language("fr", ["Medicine"], "2024", 100)
 
@@ -204,9 +202,7 @@ class TestProcessLanguages:
 
         mocker.patch("src.workflow.step2_process_languages.load_language_titles_safe", return_value=["Medicine"])
 
-        mocker.patch(
-            "src.workflow.step2_process_languages._process_titles_for_language", return_value={"Editor1": 100}
-        )
+        mocker.patch("src.workflow.step2_process_languages._process_titles_for_language", return_value={"Editor1": 100})
 
         mock_report_gen = mocker.Mock()
         mock_report_gen.load_editors_json.return_value = None
@@ -230,9 +226,7 @@ class TestProcessLanguages:
         mock_report_gen.load_editors_json.side_effect = lambda lang: {"en": {"Editor1": 100}, "fr": None}.get(lang)
         mocker.patch("src.workflow.step2_process_languages.ReportGenerator", return_value=mock_report_gen)
 
-        mocker.patch(
-            "src.workflow.step2_process_languages._process_titles_for_language", return_value={"Editor1": 100}
-        )
+        mocker.patch("src.workflow.step2_process_languages._process_titles_for_language", return_value={"Editor1": 100})
 
         with patch("src.workflow.step2_process_languages.OUTPUT_DIRS", {"languages": tmp_path, "reports": tmp_path}):
             result = process_languages("2024", skip_existing=True)

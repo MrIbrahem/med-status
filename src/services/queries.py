@@ -86,8 +86,7 @@ class QueryBuilder:
         logger.debug("Building query for %d titles in year %s", len(titles), year)
 
         placeholders = ", ".join(["%s"] * len(titles))
-        query = (
-            f"""
+        query = f"""
                 SELECT actor_name, COUNT(*) as count
                 FROM revision
                 JOIN actor ON rev_actor = actor_id
@@ -99,7 +98,6 @@ class QueryBuilder:
                 GROUP BY actor_id
                 ORDER BY count DESC
             """
-        )
         params = titles + [year]
         return query, params
 

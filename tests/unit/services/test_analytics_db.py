@@ -90,8 +90,10 @@ class TestDatabaseAnalyticsInit:
 
     def test_init_with_standard_language(self):
         """Test initialization with standard language code."""
-        with patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db, \
-                patch("src.services.analytics_db.Database") as mock_database_class:
+        with (
+            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db,
+            patch("src.services.analytics_db.Database") as mock_database_class,
+        ):
             mock_get_db.return_value = "enwiki"
             mock_db_instance = MagicMock()
             mock_database_class.return_value = mock_db_instance
@@ -102,9 +104,7 @@ class TestDatabaseAnalyticsInit:
             assert db_analytics.host == "enwiki.analytics.db.svc.wikimedia.cloud"
             assert db_analytics.db == mock_db_instance
             mock_database_class.assert_called_once_with(
-                "enwiki.analytics.db.svc.wikimedia.cloud",
-                "enwiki",
-                timeout=None
+                "enwiki.analytics.db.svc.wikimedia.cloud", "enwiki", timeout=None
             )
 
     def test_init_with_meta(self):
@@ -117,16 +117,14 @@ class TestDatabaseAnalyticsInit:
 
             assert db_analytics.database == "meta_p"
             assert db_analytics.host == "s7.analytics.db.svc.wikimedia.cloud"
-            mock_database_class.assert_called_once_with(
-                "s7.analytics.db.svc.wikimedia.cloud",
-                "meta_p",
-                timeout=None
-            )
+            mock_database_class.assert_called_once_with("s7.analytics.db.svc.wikimedia.cloud", "meta_p", timeout=None)
 
     def test_init_with_hyphenated_site_code(self):
         """Test initialization with hyphenated site code."""
-        with patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db, \
-                patch("src.services.analytics_db.Database") as mock_database_class:
+        with (
+            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db,
+            patch("src.services.analytics_db.Database") as mock_database_class,
+        ):
             mock_get_db.return_value = "bat_smgwiki"
             mock_db_instance = MagicMock()
             mock_database_class.return_value = mock_db_instance
@@ -136,9 +134,7 @@ class TestDatabaseAnalyticsInit:
             assert db_analytics.database == "bat_smgwiki"
             assert db_analytics.host == "bat_smgwiki.analytics.db.svc.wikimedia.cloud"
             mock_database_class.assert_called_once_with(
-                "bat_smgwiki.analytics.db.svc.wikimedia.cloud",
-                "bat_smgwiki",
-                timeout=None
+                "bat_smgwiki.analytics.db.svc.wikimedia.cloud", "bat_smgwiki", timeout=None
             )
 
 
@@ -148,8 +144,10 @@ class TestDatabaseAnalyticsContextManager:
 
     def test_context_manager_enter(self):
         """Test __enter__ delegates to Database.__enter__."""
-        with patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db, \
-                patch("src.services.analytics_db.Database") as mock_database_class:
+        with (
+            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db,
+            patch("src.services.analytics_db.Database") as mock_database_class,
+        ):
             mock_get_db.return_value = "enwiki"
             mock_db_instance = MagicMock()
             mock_database_class.return_value = mock_db_instance
@@ -163,8 +161,10 @@ class TestDatabaseAnalyticsContextManager:
 
     def test_context_manager_exit(self):
         """Test __exit__ delegates to Database.__exit__."""
-        with patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db, \
-                patch("src.services.analytics_db.Database") as mock_database_class:
+        with (
+            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db,
+            patch("src.services.analytics_db.Database") as mock_database_class,
+        ):
             mock_get_db.return_value = "enwiki"
             mock_db_instance = MagicMock()
             mock_database_class.return_value = mock_db_instance
@@ -178,8 +178,10 @@ class TestDatabaseAnalyticsContextManager:
 
     def test_context_manager_with_exception(self):
         """Test context manager properly handles exceptions."""
-        with patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db, \
-                patch("src.services.analytics_db.Database") as mock_database_class:
+        with (
+            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db,
+            patch("src.services.analytics_db.Database") as mock_database_class,
+        ):
             mock_get_db.return_value = "enwiki"
             mock_db_instance = MagicMock()
             mock_database_class.return_value = mock_db_instance
@@ -204,8 +206,10 @@ class TestDatabaseAnalyticsEdgeCases:
 
     def test_multiple_instances(self):
         """Test creating multiple DatabaseAnalytics instances."""
-        with patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db, \
-                patch("src.services.analytics_db.Database") as mock_database_class:
+        with (
+            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db,
+            patch("src.services.analytics_db.Database") as mock_database_class,
+        ):
             mock_get_db.side_effect = ["enwiki", "frwiki", "dewiki"]
             mock_db_instance = MagicMock()
             mock_database_class.return_value = mock_db_instance
@@ -220,8 +224,10 @@ class TestDatabaseAnalyticsEdgeCases:
 
     def test_wiki_suffix_removal_case_insensitive(self):
         """Test that 'wiki' suffix removal is case-insensitive."""
-        with patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db, \
-                patch("src.services.analytics_db.Database") as mock_database_class:
+        with (
+            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db,
+            patch("src.services.analytics_db.Database") as mock_database_class,
+        ):
             mock_get_db.return_value = "itwiki"
             mock_db_instance = MagicMock()
             mock_database_class.return_value = mock_db_instance
@@ -233,8 +239,10 @@ class TestDatabaseAnalyticsEdgeCases:
 
     def test_empty_site_code(self):
         """Test behavior with empty site code."""
-        with patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db, \
-                patch("src.services.analytics_db.Database") as mock_database_class:
+        with (
+            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db,
+            patch("src.services.analytics_db.Database") as mock_database_class,
+        ):
             mock_get_db.return_value = ""
             mock_db_instance = MagicMock()
             mock_database_class.return_value = mock_db_instance
@@ -247,8 +255,10 @@ class TestDatabaseAnalyticsEdgeCases:
 
     def test_site_code_with_only_hyphens(self):
         """Test behavior with site code containing only hyphens."""
-        with patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db, \
-                patch("src.services.analytics_db.Database") as mock_database_class:
+        with (
+            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db,
+            patch("src.services.analytics_db.Database") as mock_database_class,
+        ):
             mock_get_db.return_value = ""
             mock_db_instance = MagicMock()
             mock_database_class.return_value = mock_db_instance

@@ -114,14 +114,8 @@ def process_languages(
 
     report_generator = ReportGenerator()
     if skip_existing:
-        languages_to_skip = [
-            lang
-            for lang in languages_to_process
-            if report_generator.load_editors_json(lang)
-        ]
-        languages_to_process = [
-            lang for lang in languages_to_process if lang not in languages_to_skip
-        ]
+        languages_to_skip = [lang for lang in languages_to_process if report_generator.load_editors_json(lang)]
+        languages_to_process = [lang for lang in languages_to_process if lang not in languages_to_skip]
         logger.info("✓ Skipped %d languages with existing data", len(languages_to_skip))
 
     languages_titles: dict[str, list[str]] = gather_language_titles(

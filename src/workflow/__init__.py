@@ -113,7 +113,9 @@ class WorkflowOrchestrator:
 
         if not skip_steps or 2 not in skip_steps:
             # Step 2: Process languages
-            all_editors = self.process_languages(year, languages, sort_descending=sort_desc, skip_existing=skip_existing)
+            all_editors = self.process_languages(
+                year, languages, sort_descending=sort_desc, skip_existing=skip_existing
+            )
         else:
             logger.info("✓ Skipping Step 2: Process editor statistics for languages")
             all_editors = {}
