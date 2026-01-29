@@ -48,7 +48,7 @@ def load_db_mapping() -> Dict[str, str]:
 
 def fetch_database_mapping() -> Dict[str, str]:
     """
-    Get mapping of language codes to database names from meta_p.
+    Get mapping of language codes to database names from meta database.
 
     Returns:
         Dictionary mapping language codes to database names
@@ -56,31 +56,34 @@ def fetch_database_mapping() -> Dict[str, str]:
     Example:
         >>> orchestrator = WorkflowOrchestrator()
         >>> mapping = orchestrator.get_database_mapping()
-        >>> # Returns: {"en": "enwiki_p", "fr": "frwiki_p", ...}
+        >>> # Returns: {"en": "enwiki", "fr": "frwiki", ...}
     """
-    logger.info("Retrieving database name mappings from meta_p")
+    logger.info("Retrieving database name mappings from meta database")
 
     mapping: Dict[str, str] = {}
 
     query = query_builder.get_database_mapping()
 
-    with Database("s7.analytics.db.svc.wikimedia.cloud", "meta_p") as db:
+    with Database("s7.analytics.db.svc.wikimedia.cloud", "meta") as db:
         results = db.execute(query)
 
         for row in results:
             url = row.get("url", "")
             lang = row.get("lang", "")
             dbname = row.get("dbname", "")
+            url_lang = url.split(".")[0].replace("https://", "")
+
             if not dbname:
                 continue
             if lang:
                 mapping[lang] = dbname
             if url:
-                url_lang = url.split(".")[0].replace("https://", "")
                 mapping[url_lang] = dbname
 
         logger.info("✓ Retrieved mappings for %d languages", len(mapping))
 
+    # Ensure English value to avoid ("en", "testwiki", "https://test.wikipedia.org") entry
+    mapping["en"] = "enwiki"
     return mapping
 
 
