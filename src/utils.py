@@ -7,6 +7,7 @@ This module provides helper functions used across the application.
 import json
 import os
 import re
+from pathlib import Path
 from typing import List
 
 import pymysql.converters
@@ -75,24 +76,6 @@ def format_number(num: int) -> str:
     return f"{num:,}"
 
 
-def ensure_directory(path: str) -> None:
-    """
-    Ensure directory exists, create if not.
-
-    Args:
-        path: Directory path to ensure
-
-    Raises:
-        OSError: If directory cannot be created
-
-    Example:
-        >>> ensure_directory("output/reports")
-    """
-    if not os.path.exists(path):
-        os.makedirs(path, exist_ok=True)
-        logger.info("Created directory: %s", path)
-
-
 def save_language_titles(lang: str, titles: List[str], output_dir: str = "languages") -> None:
     """
     Save article titles for a language to JSON file.
@@ -105,13 +88,28 @@ def save_language_titles(lang: str, titles: List[str], output_dir: str = "langua
     Example:
         >>> save_language_titles("en", ["Medicine", "Health"], "languages")
     """
-    ensure_directory(output_dir)
-    output_file = os.path.join(output_dir, f"{lang}.json")
+    output_file = Path(output_dir) / f"{lang}.json"
 
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(titles, f, ensure_ascii=False, indent=2)
 
     logger.debug("Saved %d titles for language '%s' to %s", len(titles), lang, output_file)
+
+
+def save_titles_sql_results(titles: List[str], output_dir: Path) -> None:
+    """
+    Save article titles for a language to SQL results file.
+    """
+    output_file = Path(output_dir) / "medicine_titles.json"
+    try:
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(titles, f, ensure_ascii=False, indent=2)
+    except Exception:
+        logger.warning("Error saving titles to %s", output_file)
+        with open(output_file.with_suffix(".text"), "w", encoding="utf-8") as f:
+            f.write(str(titles))
+
+    logger.debug("Saved %d titles to %s", len(titles), output_file)
 
 
 def load_language_titles(lang: str, input_dir: str = "languages") -> List[str]:
@@ -131,9 +129,9 @@ def load_language_titles(lang: str, input_dir: str = "languages") -> List[str]:
     Example:
         >>> titles = load_language_titles("en", "languages")
     """
-    input_file = os.path.join(input_dir, f"{lang}.json")
+    input_file = Path(input_dir) / f"{lang}.json"
 
-    if not os.path.exists(input_file):
+    if not input_file.exists():
         raise FileNotFoundError(f"Language file not found: {input_file}")
 
     with open(input_file, "r", encoding="utf-8") as f:

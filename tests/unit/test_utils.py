@@ -7,7 +7,6 @@ import tempfile
 import pytest
 
 from src.utils import (
-    ensure_directory,
     escape_title,
     format_number,
     get_available_languages,
@@ -54,14 +53,6 @@ class TestUtils:
     def test_format_number(self, num, expected):
         """Test number formatting."""
         assert format_number(num) == expected
-
-    def test_ensure_directory(self):
-        """Test directory creation."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            test_dir = os.path.join(tmpdir, "test_subdir")
-            ensure_directory(test_dir)
-            assert os.path.exists(test_dir)
-            assert os.path.isdir(test_dir)
 
     def test_save_and_load_language_titles(self):
         """Test saving and loading language titles."""

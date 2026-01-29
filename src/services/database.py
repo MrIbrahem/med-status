@@ -20,7 +20,76 @@ from ..logging_config import get_logger
 logger = get_logger(__name__)
 
 
-class Database:
+class DatabaseUtils:
+    def __init__(self) -> None:
+        pass
+
+    def _check_database_name(self, dbname: str) -> str:
+        """
+        Ensure database name ends with '_p'.
+
+        Args:
+            dbname: Original database name
+
+        Returns:
+            Validated database name
+        """
+        pre_defined_db_mapping = {
+            "gsw": "alswiki_p",
+            "sgs": "bat_smgwiki_p",
+            "bat-smg": "bat_smgwiki_p",
+            "be-tarask": "be_x_oldwiki_p",
+            "bho": "bhwiki_p",
+            "cbk": "cbk_zamwiki_p",
+            "cbk-zam": "cbk_zamwiki_p",
+            "vro": "fiu_vrowiki_p",
+            "fiu-vro": "fiu_vrowiki_p",
+            "map-bms": "map_bmswiki_p",
+            "nds-nl": "nds_nlwiki_p",
+            "nb": "nowiki_p",
+            "rup": "roa_rupwiki_p",
+            "roa-rup": "roa_rupwiki_p",
+            "roa-tara": "roa_tarawiki_p",
+            "lzh": "zh_classicalwiki_p",
+            "zh-classical": "zh_classicalwiki_p",
+            "nan": "zh_min_nanwiki_p",
+            "zh-min-nan": "zh_min_nanwiki_p",
+            "yue": "zh_yuewiki_p",
+            "zh-yue": "zh_yuewiki_p",
+        }
+        dbname_normalized = dbname.strip().lower().removesuffix("_p").removesuffix("wiki")
+        if dbname_normalized in pre_defined_db_mapping:
+            return pre_defined_db_mapping[dbname_normalized]
+
+        if dbname_normalized == dbname.lower():
+            # logger.warning("Database name '%s' missing 'wiki' suffix. Appending suffix.", dbname)
+            return f"{dbname}wiki_p"
+
+        if not dbname.endswith("_p"):
+            # logger.warning("Database name '%s' does not end with '_p'. Appending suffix.", dbname)
+            dbname += "_p"
+        return dbname
+
+    def resolve_bytes(self, data: Any) -> Any:
+        """
+        Recursively convert bytes in data structures to strings.
+
+        Args:
+            data: Input data (could be dict, list, bytes, or other types)
+
+        Returns:
+            The input data with all byte strings converted to regular strings
+        """
+        if isinstance(data, dict):
+            return {self.resolve_bytes(key): self.resolve_bytes(value) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self.resolve_bytes(item) for item in data]
+        elif isinstance(data, bytes):
+            return data.decode("utf-8", errors="replace")
+        return data
+
+
+class Database(DatabaseUtils):
     """
     Context manager for database connections.
 
@@ -49,7 +118,7 @@ class Database:
             port: Database port (default: 3306)
         """
         self.host = host
-        self.database = database
+        self.database = self._check_database_name(database)
         self.port = port
         self.connection: Optional[pymysql.connections.Connection] = None
 
@@ -86,14 +155,13 @@ class Database:
             FileNotFoundError: If credential file doesn't exist
             ValueError: If credentials are malformed
         """
-        cred_file = os.path.expanduser(CREDENTIAL_FILE)
 
-        if not os.path.exists(cred_file):
-            logger.critical("Credential file not found: %s", cred_file)
-            raise FileNotFoundError(f"Credential file not found: {cred_file}")
+        if not os.path.exists(CREDENTIAL_FILE):
+            logger.critical("Credential file not found: %s", CREDENTIAL_FILE)
+            raise FileNotFoundError(f"Credential file not found: {CREDENTIAL_FILE}")
 
         credentials = {}
-        with open(cred_file, "r") as f:
+        with open(CREDENTIAL_FILE, "r") as f:
             for line in f:
                 line = line.strip()
                 if line.startswith("user"):
@@ -104,7 +172,7 @@ class Database:
         if "user" not in credentials or "password" not in credentials:
             raise ValueError("Invalid credential file format")
 
-        logger.debug("Credentials loaded from %s", cred_file)
+        logger.debug("Credentials loaded from %s", CREDENTIAL_FILE)
         return credentials
 
     def _connect(self) -> None:
@@ -122,7 +190,12 @@ class Database:
 
                 # Merge config with connection parameters, avoiding duplicate port
                 connect_params = DATABASE_CONFIG.copy()
-                connect_params.pop("port", None)  # Remove port from config if present
+
+                if connect_params.get("port"):
+                    self.port = connect_params["port"]
+                    connect_params.pop("port", None)  # Remove port from config if present
+
+                logger.info(f"Connecting to database {self.database} at host {self.host}:{self.port}")
 
                 self.connection = pymysql.connect(
                     host=self.host,
@@ -175,7 +248,7 @@ class Database:
                 cursor.execute(query, params)
                 results = cursor.fetchall()
                 logger.debug("Query returned %d rows", len(results))
-                return results
+                return self.resolve_bytes(results)
 
         except pymysql.err.ProgrammingError as e:
             logger.error("Query syntax error: %s\nQuery: %s", str(e), query[:200])

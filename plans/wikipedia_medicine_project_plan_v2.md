@@ -437,23 +437,6 @@ def format_number(num: int) -> str:
     """
     return f"{num:,}"
 
-
-def ensure_directory(path: str) -> None:
-    """
-    Ensure directory exists, create if not.
-
-    Args:
-        path: Directory path to ensure
-
-    Raises:
-        OSError: If directory cannot be created
-
-    Example:
-        >>> ensure_directory("output/reports")
-    """
-    if not os.path.exists(path):
-        os.makedirs(path, exist_ok=True)
-        logger.info("Created directory: %s", path)
 ```
 
 **Test**: `tests/unit/test_utils.py`

@@ -6,13 +6,13 @@ reports from editor statistics.
 """
 
 import json
-import os
 from datetime import datetime
+from pathlib import Path
 from typing import Dict
 
 from ..config import OUTPUT_DIRS
 from ..logging_config import get_logger
-from ..utils import ensure_directory, format_number
+from ..utils import format_number
 
 logger = get_logger(__name__)
 
@@ -27,13 +27,7 @@ class ReportGenerator:
 
     def __init__(self):
         """Initialize the report generator."""
-        self._ensure_output_directories()
         logger.debug("ReportGenerator initialized")
-
-    def _ensure_output_directories(self) -> None:
-        """Ensure all output directories exist."""
-        for dir_name, dir_path in OUTPUT_DIRS.items():
-            ensure_directory(dir_path)
 
     def save_editors_json(self, lang: str, editors: Dict[str, int]) -> None:
         """
@@ -43,7 +37,7 @@ class ReportGenerator:
             lang: Language code
             editors: Dictionary of editor names to edit counts
         """
-        output_file = os.path.join(OUTPUT_DIRS["editors"], f"{lang}.json")
+        output_file = Path(OUTPUT_DIRS["editors"]) / f"{lang}.json"
 
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(editors, f, ensure_ascii=False, indent=2)
@@ -71,7 +65,7 @@ class ReportGenerator:
         """
         logger.info("Generating report for language: %s", lang)
 
-        output_file = os.path.join(OUTPUT_DIRS["reports"], f"{lang}.wiki")
+        output_file = Path(OUTPUT_DIRS["reports"]) / f"{lang}.wiki"
 
         # Sort editors by edit count (descending)
         sorted_editors = sorted(editors.items(), key=lambda x: x[1], reverse=True)
@@ -117,7 +111,7 @@ class ReportGenerator:
         """
         logger.info("Generating global report")
 
-        output_file = os.path.join(OUTPUT_DIRS["reports"], "total_report.wiki")
+        output_file = Path(OUTPUT_DIRS["reports"]) / "total_report.wiki"
 
         # Aggregate all editors
         global_editors: Dict[str, int] = {}

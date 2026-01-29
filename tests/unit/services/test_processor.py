@@ -17,7 +17,7 @@ class TestEditorProcessor:
         assert processor is not None
         assert processor.query_builder is not None
 
-    @patch("src.services.processor.Database")
+    @patch("src.services.processor.DatabaseAnalytics")
     def test_process_language_filters_ips(self, mock_db_class):
         """Test that IP addresses are filtered out."""
         # Setup mock
@@ -31,14 +31,14 @@ class TestEditorProcessor:
         mock_db_class.return_value = mock_db
 
         processor = EditorProcessor()
-        editors = processor.process_language("test", ["Title1"], "testwiki_p", "2024")
+        editors = processor.process_language("test", ["Title1"], "2024")
 
         # IP should be filtered out
         assert "192.168.1.1" not in editors
         assert "ValidUser" in editors
         assert editors["ValidUser"] == 50
 
-    @patch("src.services.processor.Database")
+    @patch("src.services.processor.DatabaseAnalytics")
     def test_process_language_filters_bots(self, mock_db_class):
         """Test that bot accounts are filtered out."""
         # Setup mock
@@ -52,7 +52,7 @@ class TestEditorProcessor:
         mock_db_class.return_value = mock_db
 
         processor = EditorProcessor()
-        editors = processor.process_language("test", ["Title1"], "testwiki_p", "2024")
+        editors = processor.process_language("test", ["Title1"], "2024")
 
         # Bot should be filtered out
         assert "SomeBot" not in editors

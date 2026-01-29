@@ -9,7 +9,7 @@ from typing import Dict, List
 
 from ..logging_config import get_logger
 from ..utils import is_ip_address
-from .database import Database
+from .analytics_db import DatabaseAnalytics
 from .queries import QueryBuilder
 
 logger = get_logger(__name__)
@@ -28,44 +28,41 @@ class EditorProcessor:
         self.query_builder = QueryBuilder()
         logger.debug("EditorProcessor initialized")
 
-    def process_language(
-        self, lang: str, titles: List[str], dbname: str, year: str, host: str = "analytics.db.svc.wikimedia.cloud"
-    ) -> Dict[str, int]:
+    def process_language(self, lang: str, titles: List[str], year: str) -> Dict[str, int]:
         """
         Process editor statistics for a specific language.
 
         Args:
             lang: Language code (e.g., "en", "ar", "fr")
             titles: List of article titles in this language
-            dbname: Database name (e.g., "enwiki_p")
             year: Year to filter (e.g., "2024")
-            host: Database host (default: analytics.db.svc.wikimedia.cloud)
 
         Returns:
             Dictionary mapping editor names to edit counts
 
         Example:
             >>> processor = EditorProcessor()
-            >>> editors = processor.process_language("en", ["Medicine"], "enwiki_p", "2024")
+            >>> editors = processor.process_language("en", ["Medicine"], "2024")
             >>> # Returns: {"Editor1": 150, "Editor2": 75, ...}
         """
-        logger.info("Processing language: %s (%s)", lang, dbname)
+        logger.info("Processing language: %s", lang)
         logger.debug("Processing %d titles for year %s", len(titles), year)
 
         editors: Dict[str, int] = {}
+        params = []
 
         # Special handling for Arabic and English
         if lang == "ar":
-            query = self.query_builder.get_editors_arabic(year)
+            query, params = self.query_builder.get_editors_arabic(year)
         elif lang == "en":
-            query = self.query_builder.get_editors_english(year)
+            query, params = self.query_builder.get_editors_english(year)
         else:
             # Standard query for other languages
-            query = self.query_builder.get_editors_standard(titles, year)
+            query, params = self.query_builder.get_editors_standard(titles, year)
 
         try:
-            with Database(host, dbname) as db:
-                results = db.execute(query)
+            with DatabaseAnalytics(lang) as db:
+                results = db.execute(query, params=params)
 
                 for row in results:
                     actor_name = row.get("actor_name", "")

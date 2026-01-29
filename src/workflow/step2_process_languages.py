@@ -6,50 +6,13 @@ from typing import Dict, List, Optional
 
 from ..config import BATCH_SIZE, OUTPUT_DIRS
 from ..logging_config import get_logger
-from ..services.database import Database
-from ..services.processor import EditorProcessor
-from ..services.queries import QueryBuilder
-from ..services.reports import ReportGenerator
+from ..services import EditorProcessor, QueryBuilder, ReportGenerator
 from ..utils import get_available_languages, load_language_titles
 
 logger = get_logger(__name__)
 
 processor = EditorProcessor()
-
 query_builder = QueryBuilder()
-
-
-def get_database_mapping(host: str = "analytics.db.svc.wikimedia.cloud") -> Dict[str, str]:
-    """
-    Get mapping of language codes to database names from meta_p.
-
-    Returns:
-        Dictionary mapping language codes to database names
-
-    Example:
-        >>> orchestrator = WorkflowOrchestrator()
-        >>> mapping = orchestrator.get_database_mapping()
-        >>> # Returns: {"en": "enwiki_p", "fr": "frwiki_p", ...}
-    """
-    logger.info("Retrieving database name mappings from meta_p")
-
-    mapping: Dict[str, str] = {}
-
-    query = query_builder.get_database_mapping()
-
-    with Database(host, "meta_p") as db:
-        results = db.execute(query)
-
-        for row in results:
-            lang = row.get("lang", "")
-            dbname = row.get("dbname", "")
-
-            if lang and dbname:
-                mapping[lang] = dbname
-
-        logger.info("✓ Retrieved mappings for %d languages", len(mapping))
-
-    return mapping
 
 
 def _get_languages_to_process(languages: Optional[List[str]]) -> List[str]:
@@ -68,47 +31,33 @@ def _get_languages_to_process(languages: Optional[List[str]]) -> List[str]:
 
 def _process_single_language(
     lang: str,
-    index: int,
-    total: int,
-    db_mapping: Dict[str, str],
     year: str,
     batch_size: int,
-    all_editors: Dict[str, Dict[str, int]],
-) -> None:
+) -> Dict[str, int]:
     """Process a single language."""
     report_generator = ReportGenerator()
-    logger.info("")
-    logger.info("-" * 60)
-    logger.info("Language %d/%d: %s", index, total, lang)
-    logger.info("-" * 60)
 
     titles = load_language_titles(lang, OUTPUT_DIRS["languages"])
 
-    if lang not in db_mapping:
-        logger.warning("No database mapping for language '%s', skipping", lang)
-        return
+    editors = _process_titles_for_language(lang, titles, year, batch_size)
 
-    dbname = db_mapping[lang]
-    editors = _process_titles_for_language(lang, titles, dbname, year, batch_size)
-
-    all_editors[lang] = editors
-    report_generator.save_editors_json(lang, editors)
-    report_generator.generate_language_report(lang, editors, year)
+    if editors:
+        report_generator.save_editors_json(lang, editors)
+        report_generator.generate_language_report(lang, editors, year)
 
     logger.info("✓ Language '%s' complete: %d editors, %d edits", lang, len(editors), sum(editors.values()))
+    return editors
 
 
 def _process_titles_for_language(
     lang: str,
     titles: List[str],
-    dbname: str,
     year: str,
     batch_size: int,
-    host: str = "analytics.db.svc.wikimedia.cloud",
 ) -> Dict[str, int]:
     """Process titles for a language, with batching if needed."""
     if len(titles) <= batch_size:
-        return processor.process_language(lang, titles, dbname, year, host)
+        return processor.process_language(lang, titles, year)
 
     logger.info("Processing %d titles in batches of %d", len(titles), batch_size)
     editors: Dict[str, int] = {}
@@ -117,7 +66,7 @@ def _process_titles_for_language(
         batch = titles[batch_num : batch_num + batch_size]
         logger.debug("Processing batch %d-%d", batch_num, batch_num + len(batch))
 
-        batch_editors = processor.process_language(lang, batch, dbname, year, host)
+        batch_editors = processor.process_language(lang, batch, year)
 
         # Merge batch results
         for editor, count in batch_editors.items():
@@ -150,7 +99,6 @@ def process_languages(
     logger.info("Step 2: Processing editor statistics by language")
     logger.info("=" * 60)
 
-    db_mapping = get_database_mapping()
     languages_to_process = _get_languages_to_process(languages)
 
     logger.info("Processing %d languages", len(languages_to_process))
@@ -158,7 +106,13 @@ def process_languages(
     all_editors: Dict[str, Dict[str, int]] = {}
 
     for i, lang in enumerate(languages_to_process, 1):
-        _process_single_language(lang, i, len(languages_to_process), db_mapping, year, batch_size, all_editors)
+        logger.info("")
+        logger.info("-" * 60)
+        logger.info("Language %d/%d: %s", i, len(languages_to_process), lang)
+        logger.info("-" * 60)
+        lang_editors = _process_single_language(lang, year, batch_size)
+        if lang_editors:
+            all_editors[lang] = lang_editors
 
     logger.info("")
     logger.info("✓ Step 2 complete: %d languages processed", len(all_editors))

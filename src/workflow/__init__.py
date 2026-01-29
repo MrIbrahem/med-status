@@ -6,11 +6,10 @@ from typing import Dict, List, Optional
 
 from ..config import OUTPUT_DIRS
 from ..logging_config import get_logger
-from ..services.processor import EditorProcessor
-from ..services.queries import QueryBuilder
-from ..services.reports import ReportGenerator
+from ..services import EditorProcessor, QueryBuilder, ReportGenerator
+from ..services.db_mapping import get_database_mapping
 from .step1_retrieve_titles import retrieve_medicine_titles
-from .step2_process_languages import get_database_mapping, process_languages
+from .step2_process_languages import process_languages
 from .step3_generate_reports import generate_reports
 
 logger = get_logger(__name__)
@@ -27,21 +26,17 @@ class WorkflowOrchestrator:
     4. Generate reports
     """
 
-    def __init__(self, host: str = "analytics.db.svc.wikimedia.cloud"):
+    def __init__(self):
         """
         Initialize the workflow orchestrator.
-
-        Args:
-            host: Database host (default: analytics.db.svc.wikimedia.cloud)
         """
-        self.host = host
         self.query_builder = QueryBuilder()
         self.processor = EditorProcessor()
         self.report_generator = ReportGenerator()
         logger.debug("WorkflowOrchestrator initialized")
 
     def get_database_mapping(self) -> dict:
-        return get_database_mapping(self.host)
+        return get_database_mapping()
 
     def process_languages(self, year: str, languages: Optional[List[str]] = None) -> dict:
         """

@@ -5,7 +5,7 @@ Step 3: Generate global reports
 from typing import Dict
 
 from ..logging_config import get_logger
-from ..services.reports import ReportGenerator
+from ..services import ReportGenerator
 
 logger = get_logger(__name__)
 

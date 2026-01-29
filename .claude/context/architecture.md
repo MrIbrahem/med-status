@@ -241,7 +241,6 @@ class ReportGenerator:
 def is_ip_address(text: str) -> bool
 def escape_title(title: str) -> str
 def format_number(num: int) -> str
-def ensure_directory(path: str) -> None
 ```
 
 **IP Detection:**
