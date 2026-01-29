@@ -45,6 +45,19 @@ class TestWorkflowOrchestrator:
         # get_database_mapping added 'en' by default
         assert mapping["en"] == "enwiki"
 
+    @pytest.mark.skip(reason="AssertionError: Expected 'generate_global_report' to be called once. Called 0 times")
+    def test_generate_reports(self, mocker):
+        """Test generating reports."""
+        mock_report_gen = mocker.Mock()
+        mocker.patch("src.workflow.ReportGenerator", return_value=mock_report_gen)
+
+        orchestrator = WorkflowOrchestrator()
+        all_editors = {"en": {"Editor1": 100}}
+
+        orchestrator.generate_reports(all_editors, "2024")
+
+        mock_report_gen.generate_global_report.assert_called_once_with(all_editors, "2024")
+
     # @pytest.mark.skip(reason="AssertionError: KeyError: 'Editor1'")
     def test_process_languages(self, mocker):
         """Test processing languages."""
@@ -78,16 +91,3 @@ class TestWorkflowOrchestrator:
         assert "en" in all_editors
         assert all_editors == {"en": {"Editor1": 100}}
         assert all_editors["en"]["Editor1"] == 100
-
-    @pytest.mark.skip(reason="AssertionError: Expected 'generate_global_report' to be called once. Called 0 times")
-    def test_generate_reports(self, mocker):
-        """Test generating reports."""
-        mock_report_gen = mocker.Mock()
-        mocker.patch("src.workflow.ReportGenerator", return_value=mock_report_gen)
-
-        orchestrator = WorkflowOrchestrator()
-        all_editors = {"en": {"Editor1": 100}}
-
-        orchestrator.generate_reports(all_editors, "2024")
-
-        mock_report_gen.generate_global_report.assert_called_once_with(all_editors, "2024")

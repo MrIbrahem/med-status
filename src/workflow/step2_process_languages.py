@@ -56,26 +56,11 @@ def _process_titles_for_language(
     batch_size: int,
 ) -> Dict[str, int]:
     """Process titles for a language, with batching if needed."""
-    if len(titles) <= batch_size:
-        return processor.process_language(lang, titles, year)
 
-    logger.info("Processing %d titles in batches of %d", len(titles), batch_size)
-    editors: Dict[str, int] = {}
+    if lang in ["ar", "en"]:
+        return processor.process_language_ar_en(lang, year)
 
-    for batch_num in range(0, len(titles), batch_size):
-        batch = titles[batch_num : batch_num + batch_size]
-        logger.debug("Processing batch %d-%d", batch_num, batch_num + len(batch))
-
-        batch_editors = processor.process_language(lang, batch, year)
-
-        # Merge batch results
-        for editor, count in batch_editors.items():
-            if editor in editors:
-                editors[editor] += count
-            else:
-                editors[editor] = count
-
-    return editors
+    return processor.process_language_patch(lang, titles, year, batch_size)
 
 
 def gather_language_titles(languages_to_process: List[str], sort_descending: bool = False) -> dict[str, list[str]]:

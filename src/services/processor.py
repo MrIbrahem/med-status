@@ -28,25 +28,18 @@ class EditorProcessor:
         self.query_builder = QueryBuilder()
         logger.debug("EditorProcessor initialized")
 
-    def process_language(self, lang: str, titles: List[str], year: str) -> Dict[str, int]:
+    def process_language_ar_en(self, lang: str, year: str) -> Dict[str, int]:
         """
         Process editor statistics for a specific language.
 
         Args:
             lang: Language code (e.g., "en", "ar", "fr")
-            titles: List of article titles in this language
             year: Year to filter (e.g., "2024")
 
         Returns:
             Dictionary mapping editor names to edit counts
-
-        Example:
-            >>> processor = EditorProcessor()
-            >>> editors = processor.process_language("en", ["Medicine"], "2024")
-            >>> # Returns: {"Editor1": 150, "Editor2": 75, ...}
         """
         logger.info("Processing language: %s", lang)
-        logger.debug("Processing %d titles for year %s", len(titles), year)
 
         editors: Dict[str, int] = {}
         params = None
@@ -56,9 +49,6 @@ class EditorProcessor:
             query, params = self.query_builder.get_editors_arabic(year)
         elif lang == "en":
             query, params = self.query_builder.get_editors_english(year)
-        else:
-            # Standard query for other languages
-            query, params = self.query_builder.get_editors_standard(titles, year)
 
         results = []
         try:
@@ -85,9 +75,97 @@ class EditorProcessor:
 
             editors[actor_name] = count
 
-            # logger.info("✓ Language '%s' complete: %d editors found", lang, len(editors))
+        return editors
+
+    def _batch_titles(self, titles: List[str], batch_size: int) -> List[List[str]]:
+        """Helper method to batch titles into smaller lists."""
+        batches = []
+        for i in range(0, len(titles), batch_size):
+            batches.append(titles[i : i + batch_size])
+        return batches
+
+    def process_language_patch(
+        self,
+        lang: str,
+        titles: List[str],
+        year: str,
+        batch_size: int = 100,
+    ) -> Dict[str, int]:
+        """
+        Process editor statistics for a specific language.
+
+        Args:
+            lang: Language code (e.g., "en", "ar", "fr")
+            titles: List of article titles in this language
+            year: Year to filter (e.g., "2024")
+
+        Returns:
+            Dictionary mapping editor names to edit counts
+
+        Example:
+            >>> processor = EditorProcessor()
+            >>> editors = processor.process_language_patch("en", ["Medicine"], "2024", 100)
+            >>> # Returns: {"Editor1": 150, "Editor2": 75, ...}
+        """
+        logger.info("Processing language: %s", lang)
+        logger.debug("Processing %d titles for year %s", len(titles), year)
+
+        editors: Dict[str, int] = {}
+
+        with DatabaseAnalytics(lang) as db:
+            batches = self._batch_titles(titles, batch_size)
+            for batch_num, batch in enumerate(batches, 1):
+                logger.debug("Processing batch %d/%d", batch_num, len(batches))
+                query, params = self.query_builder.get_editors_standard(batch, year)
+
+                try:
+                    results = db.execute(query, params=params)
+                except Exception as e:
+                    logger.error("Failed to process language %s: %s", lang, str(e), exc_info=True)
+                    raise
+
+                for row in results:
+                    actor_name = row.get("actor_name", "")
+                    count = row.get("count", 0)
+
+                    # Filter out IP addresses
+                    if is_ip_address(actor_name):
+                        logger.debug("Skipped IP address: %s", actor_name)
+                        continue
+
+                    # Filter out bot accounts (additional check)
+                    if "bot" in actor_name.lower():
+                        logger.debug("Skipped bot account: %s", actor_name)
+                        continue
+
+                    editors[actor_name] = count
 
         return editors
+
+    def process_language(self, lang: str, titles: List[str], year: str, batch_size: int = 100) -> Dict[str, int]:
+        """
+        Process editor statistics for a specific language.
+
+        Args:
+            lang: Language code (e.g., "en", "ar", "fr")
+            titles: List of article titles in this language
+            year: Year to filter (e.g., "2024")
+
+        Returns:
+            Dictionary mapping editor names to edit counts
+
+        Example:
+            >>> processor = EditorProcessor()
+            >>> editors = processor.process_language("en", ["Medicine"], "2024")
+            >>> # Returns: {"Editor1": 150, "Editor2": 75, ...}
+        """
+        logger.info("Processing language: %s", lang)
+        logger.debug("Processing %d titles for year %s", len(titles), year)
+
+        if lang in ["ar", "en"]:
+            return self.process_language_ar_en(lang, year)
+
+        return self.process_language_patch(lang, titles, year, batch_size)
 
     def aggregate_editors(self, all_editors: Dict[str, Dict[str, int]]) -> Dict[str, int]:
         """
