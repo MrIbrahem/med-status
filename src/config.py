@@ -58,3 +58,19 @@ DATABASE_CONFIG: Dict[str, Any] = {
     "read_timeout": QUERY_TIMEOUT,
     "autocommit": True,
 }
+
+# MDWiki Configuration
+MDWIKI_USERNAME: str = os.getenv("MDWIKI_USERNAME", "")
+MDWIKI_PASSWORD: str = os.getenv("MDWIKI_PASSWORD", "")
+MDWIKI_SITE: str = "mdwiki.org"
+MDWIKI_BASE_PAGE: str = "WikiProjectMed:WikiProject_Medicine/Stats/Top_medical_editors"
+
+# Validate MDWiki credentials
+if not MDWIKI_USERNAME or not MDWIKI_PASSWORD:
+    import logging
+
+    logging_logger = logging.getLogger(__name__)
+    logging_logger.warning(
+        "MDWiki credentials not found in environment variables. "
+        "Upload functionality will be disabled."
+    )

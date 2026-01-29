@@ -11,6 +11,7 @@ from ..services.db_mapping import get_database_mapping
 from .step1_retrieve_titles import download_medicine_titles
 from .step2_process_languages import process_languages
 from .step3_generate_reports import generate_reports, generate_reports_from_files
+from .step4_uploader import ReportUploader
 
 logger = get_logger(__name__)
 
@@ -24,6 +25,7 @@ class WorkflowOrchestrator:
     2. Get database mappings from meta_p
     3. Process editor statistics for each language
     4. Generate reports
+    5. Upload reports to MDWiki
     """
 
     def __init__(self):
@@ -33,6 +35,7 @@ class WorkflowOrchestrator:
         self.query_builder = QueryBuilder()
         self.processor = EditorProcessor()
         self.report_generator = ReportGenerator()
+        self.uploader = ReportUploader()
         logger.debug("WorkflowOrchestrator initialized")
 
     def get_database_mapping(self) -> dict:
@@ -146,6 +149,13 @@ class WorkflowOrchestrator:
             all_editors = self.generate_reports_from_files(year)
         else:
             logger.info("✓ Skipping Step 3: Generate reports")
+
+        if not skip_steps or 4 not in skip_steps:
+            # Step 4: Upload reports to MDWiki
+            upload_results = self.uploader.upload_all_reports(year=year)
+        else:
+            logger.info("✓ Skipping Step 4: Upload reports to MDWiki")
+            upload_results = None
 
         # Final summary
         logger.info("")
