@@ -26,15 +26,15 @@ def parse_arguments() -> argparse.Namespace:
         description="Wikipedia Medicine Editor Analysis Tool",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  # Run with default settings (current year, INFO level)
-  python -m src.main
+            Examples:
+            # Run with default settings (current year, INFO level)
+            python start.py
 
-  # Run with debug logging
-  python -m src.main --log-level DEBUG
+            # Run with debug logging
+            python start.py --log-level DEBUG
 
-  # Specify year and save logs to file
-  python -m src.main --year 2023 --log-file output.log
+            # Specify year and save logs to file
+            python start.py --year 2023 --log-file output.log
         """,
     )
 
@@ -53,7 +53,10 @@ Examples:
     parser.add_argument(
         "--languages", type=str, nargs="+", default=None, help="Specific languages to process (default: all)"
     )
-
+    # add argument to skip Steps
+    parser.add_argument(
+        "--skip-steps", type=int, nargs="+", default=[], help="List of steps to skip (default: none)"
+    )
     return parser.parse_args()
 
 
@@ -75,6 +78,10 @@ def main() -> int:
     logger.info("=" * 60)
     logger.info("Year: %s", args.year)
     logger.info("Log Level: %s", args.log_level)
+
+    if args.skip_steps:
+        logger.info("Skip Steps: %s", ", ".join(map(str, args.skip_steps)))
+
     if args.languages:
         logger.info("Languages: %s", ", ".join(args.languages))
     logger.info("=" * 60)
@@ -83,7 +90,11 @@ def main() -> int:
     orchestrator = WorkflowOrchestrator()
 
     # Run complete workflow
-    exit_code = orchestrator.run_complete_workflow(year=args.year, languages=args.languages)
+    exit_code = orchestrator.run_complete_workflow(
+        year=args.year,
+        languages=args.languages,
+        skip_steps=args.skip_steps
+    )
 
     return exit_code
 

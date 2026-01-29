@@ -57,7 +57,7 @@ def fetch_medicine_titles() -> List[Dict[str, Any]]:
     return results
 
 
-def retrieve_medicine_titles() -> Dict[str, List[str]]:
+def download_medicine_titles() -> None:
     """
     Retrieve Medicine project articles with langlinks from enwiki.
 
@@ -66,7 +66,7 @@ def retrieve_medicine_titles() -> Dict[str, List[str]]:
 
     Example:
         >>> orchestrator = WorkflowOrchestrator()
-        >>> titles = orchestrator.retrieve_medicine_titles()
+        >>> titles = orchestrator.download_medicine_titles()
         >>> # Returns: {"en": ["Medicine"], "fr": ["Médecine"], ...}
     """
     logger.info("=" * 60)
@@ -81,9 +81,7 @@ def retrieve_medicine_titles() -> Dict[str, List[str]]:
 
     logger.info("✓ Found %d languages with %d total articles", len(titles_by_language), len(results))
 
-    return titles_by_language
-
 
 __all__ = [
-    "retrieve_medicine_titles",
+    "download_medicine_titles",
 ]
