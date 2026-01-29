@@ -111,7 +111,7 @@ class WorkflowOrchestrator:
 
         if not skip_steps or 3 not in skip_steps:
             # Step 3: Generate global report
-            self.generate_reports(all_editors, year, sort_descending=sort_desc)
+            self.generate_reports(all_editors, year)
         else:
             logger.info("✓ Skipping Step 3: Generate reports")
 
