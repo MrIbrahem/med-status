@@ -21,8 +21,8 @@ my code is broken fix it
 ### ✅ Good Prompt
 
 ``` ```
-I'm getting a "max_user_connections exceeded" error when processing multiple 
-languages in the main workflow. This happens after successfully processing 
+I'm getting a "max_user_connections exceeded" error when processing multiple
+languages in the main workflow. This happens after successfully processing
 about 5 languages.
 
 Error message:
@@ -40,7 +40,7 @@ class Database:
             port=port,
             read_default_file="~/replica.my.cnf"
         )
-    
+
     def execute(self, query):
         cursor = self.connection.cursor(pymysql.cursors.DictCursor)
         cursor.execute(query)
@@ -55,8 +55,8 @@ for lang in languages:
     # process results
 ```
 
-I think the issue is that connections aren't being closed, but I'm not sure how 
-to implement proper connection management. Can you help me refactor this to use 
+I think the issue is that connections aren't being closed, but I'm not sure how
+to implement proper connection management. Can you help me refactor this to use
 context managers as recommended in the project conventions?
 ``` ```
 
@@ -87,7 +87,7 @@ add csv export
 ### ✅ Good Prompt
 
 ``` ```
-I need to add a feature to export editor statistics to CSV format in addition 
+I need to add a feature to export editor statistics to CSV format in addition
 to the existing WikiText format.
 
 Requirements:
@@ -106,7 +106,7 @@ class ReportGenerator:
 ```
 
 Questions:
-1. Should I add a new method `generate_global_csv()` or modify the existing one 
+1. Should I add a new method `generate_global_csv()` or modify the existing one
    to accept a format parameter?
 2. Should this be a separate file or combined with WikiText in the same function?
 3. Do I need to update main.py to call this, or should it be automatic?
@@ -148,7 +148,7 @@ is this good?
 ### ✅ Good Prompt
 
 ``` ```
-Please review this implementation of the batch query processor in processor.py. 
+Please review this implementation of the batch query processor in processor.py.
 I'm specifically concerned about:
 1. Error handling completeness
 2. SQL injection prevention
@@ -157,42 +157,42 @@ I'm specifically concerned about:
 Code to review:
 ```python
 class EditorProcessor:
-    def process_language(self, lang: str, titles: List[str], 
+    def process_language(self, lang: str, titles: List[str],
                         dbname: str, year: str) -> Dict[str, int]:
         """Process editor statistics for a language."""
         editors = {}
-        
+
         # Batch titles to prevent query timeouts
         for batch in self._batch_titles(titles):
             # Escape titles for SQL
             escaped = [pymysql.converters.escape_string(t) for t in batch]
             titles_str = "', '".join(escaped)
-            
+
             query = f"""
                 SELECT actor_name, COUNT(*) as count
                 FROM revision
                 JOIN actor ON rev_actor = actor_id
                 JOIN page ON rev_page = page_id
                 WHERE page_title IN ('{titles_str}')
-                  AND rev_timestamp LIKE '{year}%'
+                  AND YEAR(rev_timestamp) = {year}
                   AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
                 GROUP BY actor_id
             """
-            
+
             try:
-                with Database(f"{dbname}.analytics.db.svc.wikimedia.cloud", 
+                with Database(f"{dbname}.analytics.db.svc.wikimedia.cloud",
                             f"{dbname}_p") as db:
                     results = db.execute(query)
-                    
+
                 for row in results:
                     username = row['actor_name']
                     if not self._is_ip_address(username):
                         editors[username] = editors.get(username, 0) + row['count']
-                        
+
             except pymysql.err.OperationalError as e:
                 logger.error("Query failed for %s: %s", lang, e)
                 continue
-        
+
         return editors
 ```
 
@@ -237,7 +237,7 @@ I'm getting a UnicodeDecodeError when writing WikiText reports to files.
 
 Full error:
 ```
-UnicodeDecodeError: 'utf-8' codec can't decode byte 0x84 in position 152: 
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x84 in position 152:
 invalid start byte
 ```
 
@@ -269,7 +269,7 @@ Questions:
 2. How should I handle non-ASCII characters properly?
 3. Do I need to specify encoding in the open() call?
 
-I looked at the conventions document but couldn't find specific guidance on 
+I looked at the conventions document but couldn't find specific guidance on
 Unicode handling.
 ``` ```
 
@@ -303,7 +303,7 @@ def process(x):
 ### ✅ Good Prompt
 
 ``` ```
-The main.py file has grown to over 400 lines and has multiple responsibilities. 
+The main.py file has grown to over 400 lines and has multiple responsibilities.
 I'd like to refactor it to follow better separation of concerns.
 
 Current structure:
@@ -373,7 +373,7 @@ SELECT * FROM page WHERE page_title IN (...)
 ### ✅ Good Prompt
 
 ``` ```
-I'm trying to optimize the editor statistics query for large title lists 
+I'm trying to optimize the editor statistics query for large title lists
 (5000+ titles), but it's timing out after 60 seconds.
 
 Current query:
@@ -384,7 +384,7 @@ JOIN actor ON rev_actor = actor_id
 JOIN page ON rev_page = page_id
 WHERE page_title IN ('Title_1', 'Title_2', ... 5000 more titles)
   AND page_namespace = 0
-  AND rev_timestamp LIKE '2024%'
+  AND YEAR(rev_timestamp) = 2024
   AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
 GROUP BY actor_id
 ORDER BY count DESC
@@ -404,7 +404,7 @@ Questions:
 3. Would using a temporary table help?
 4. Is 100 the right batch size or should I adjust?
 
-I checked EXPLAIN and see it's doing a full table scan on revision. The page 
+I checked EXPLAIN and see it's doing a full table scan on revision. The page
 table has an index on (page_namespace, page_title) which should be used.
 
 Can you help optimize this query while maintaining the same results?
@@ -437,7 +437,7 @@ write tests for my function
 ### ✅ Good Prompt
 
 ``` ```
-I need help writing tests for the EditorProcessor.aggregate_editors() method. 
+I need help writing tests for the EditorProcessor.aggregate_editors() method.
 I'm struggling with how to mock the database results properly.
 
 Function to test:
@@ -445,30 +445,30 @@ Function to test:
 def aggregate_editors(self, results: List[Dict[str, Any]]) -> Dict[str, int]:
     """
     Aggregate editor counts from query results.
-    
+
     Args:
         results: List of dicts with 'actor_name' and 'count' keys
-    
+
     Returns:
         Dict mapping usernames to total edit counts
     """
     editors = {}
     for row in results:
         username = row['actor_name']
-        
+
         # Skip bots
         if self.is_bot(username):
             logger.warning("Skipped bot: %s", username)
             continue
-        
+
         # Skip IPs
         if self.is_ip_address(username):
             logger.warning("Skipped IP: %s", username)
             continue
-        
+
         # Aggregate counts
         editors[username] = editors.get(username, 0) + row['count']
-    
+
     return editors
 ```
 
@@ -488,9 +488,9 @@ def test_aggregate_editors():
         {'actor_name': 'User1', 'count': 10},
         {'actor_name': 'User2', 'count': 5},
     ]
-    
+
     aggregated = processor.aggregate_editors(results)
-    
+
     assert aggregated == {'User1': 10, 'User2': 5}
 ```
 
@@ -530,17 +530,17 @@ should I use a class or functions?
 ### ✅ Good Prompt
 
 ``` ```
-I need to decide on the architecture for the report generation component. 
+I need to decide on the architecture for the report generation component.
 Should I use a class-based or function-based approach?
 
 Current implementation (function-based):
 ```python
-def generate_language_report(lang: str, editors: Dict[str, int], 
+def generate_language_report(lang: str, editors: Dict[str, int],
                             output_dir: str) -> None:
     """Generate WikiText report for a language."""
     # Implementation...
 
-def generate_global_report(all_editors: Dict[str, Dict[str, int]], 
+def generate_global_report(all_editors: Dict[str, Dict[str, int]],
                           output_dir: str) -> None:
     """Generate global summary report."""
     # Implementation...
@@ -555,13 +555,13 @@ Proposed alternative (class-based):
 class ReportGenerator:
     def __init__(self, output_dir: str):
         self.output_dir = output_dir
-        
-    def generate_language_report(self, lang: str, 
+
+    def generate_language_report(self, lang: str,
                                 editors: Dict[str, int]) -> None:
         """Generate WikiText report for a language."""
         # Implementation...
-        
-    def generate_global_report(self, 
+
+    def generate_global_report(self,
                               all_editors: Dict[str, Dict[str, int]]) -> None:
         """Generate global summary report."""
         # Implementation...

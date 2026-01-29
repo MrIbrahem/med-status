@@ -604,27 +604,6 @@ def get_database_mapping() -> Dict[str, str]:
 # This helps identify highly active editors
 velocity = total_edits / days_active
 
-# Use LIKE for year filtering instead of YEAR() for performance
-# The index on rev_timestamp supports LIKE but not YEAR()
-query = f"WHERE rev_timestamp LIKE '{year}%'"
-```
-
-### SQL Query Comments
-```python
-query = """
-    SELECT actor_name, COUNT(*) as count
-    FROM revision
-    JOIN actor ON rev_actor = actor_id  -- Link revisions to editors
-    JOIN page ON rev_page = page_id      -- Link revisions to pages
-    WHERE page_title IN (%(titles)s)
-      AND page_namespace = 0              -- Main article namespace only
-      AND rev_timestamp LIKE '2024%%'     -- Filter by year (uses index)
-      AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%%bot%%'  -- Exclude bots
-    GROUP BY actor_id
-    ORDER BY count DESC
-"""
-```
-
 ## Workflow Reference
 
 The application follows these steps:

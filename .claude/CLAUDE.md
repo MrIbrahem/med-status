@@ -6,7 +6,7 @@ This directory contains configuration files and guidelines for using Claude AI a
 
 ```
 .claude/
-├── README.md                      
+├── README.md
 ├── CLAUDE.md                      # Main guide for working with Claude
 ├── settings.json                  # Project configuration for Claude
 ├── prompts/
@@ -116,27 +116,27 @@ Example:
 def get_editors(self, titles: List[str], year: str) -> Dict[str, int]:
     """
     Retrieve editor statistics for given titles.
-    
+
     Args:
         titles: List of article titles to query
         year: Year to filter revisions (e.g., "2024")
-    
+
     Returns:
         Dictionary mapping editor names to edit counts
-    
+
     Note:
         Filters out bot accounts and IP addresses automatically.
     """
     # Escape titles to prevent SQL injection
     escaped_titles = [pymysql.converters.escape_string(t) for t in titles]
-    
+
     query = """
-        SELECT actor_name, COUNT(*) as count 
+        SELECT actor_name, COUNT(*) as count
         FROM revision
         JOIN actor ON rev_actor = actor_id
         JOIN page ON rev_page = page_id
         WHERE page_title IN (%s)
-          AND rev_timestamp LIKE %s
+          AND YEAR(rev_timestamp) = %s
           AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%%bot%%'
         GROUP BY actor_id
     """
@@ -173,9 +173,9 @@ logger.error("Failed to connect to %s: %s", dbname, str(e), exc_info=True)
 
 **Good Prompt:**
 ```
-I'm getting a "max_user_connections" error in database.py when processing 
-multiple languages. Here's the current code [paste code]. The error occurs 
-after processing about 5 languages. How can I ensure connections are properly 
+I'm getting a "max_user_connections" error in database.py when processing
+multiple languages. Here's the current code [paste code]. The error occurs
+after processing about 5 languages. How can I ensure connections are properly
 closed?
 ```
 
@@ -189,9 +189,9 @@ closed?
 
 **Good Prompt:**
 ```
-I need to add a feature to export editor statistics to CSV format in addition 
-to WikiText. The CSV should have columns: Rank, Username, EditCount, Wiki. 
-Where should this go in the current architecture, and can you help implement it 
+I need to add a feature to export editor statistics to CSV format in addition
+to WikiText. The CSV should have columns: Rank, Username, EditCount, Wiki.
+Where should this go in the current architecture, and can you help implement it
 following our existing patterns in reports.py?
 ```
 
@@ -205,7 +205,7 @@ following our existing patterns in reports.py?
 
 **Good Prompt:**
 ```
-Please review this implementation of the batch query processor in processor.py 
+Please review this implementation of the batch query processor in processor.py
 [paste code]. Check for:
 1. Proper error handling
 2. SQL injection prevention
@@ -222,8 +222,8 @@ Please review this implementation of the batch query processor in processor.py
 
 **Good Prompt:**
 ```
-The main.py file is getting too long (500+ lines). Can you help refactor it 
-into smaller modules while maintaining the current workflow? Suggest a new 
+The main.py file is getting too long (500+ lines). Can you help refactor it
+into smaller modules while maintaining the current workflow? Suggest a new
 structure that follows our separation of concerns.
 ```
 
@@ -352,7 +352,7 @@ if not results:
 
 **Prompt for Claude:**
 ```
-I'm hitting max_user_connections. Can you audit all database connection code 
+I'm hitting max_user_connections. Can you audit all database connection code
 in [module] and ensure proper connection management?
 ```
 
@@ -363,7 +363,7 @@ in [module] and ensure proper connection management?
 
 **Prompt for Claude:**
 ```
-This query is timing out [paste query]. Can you optimize it or suggest 
+This query is timing out [paste query]. Can you optimize it or suggest
 breaking it into smaller chunks?
 ```
 
@@ -374,7 +374,7 @@ breaking it into smaller chunks?
 
 **Prompt for Claude:**
 ```
-I'm running out of memory when fetching all results. Can you refactor this 
+I'm running out of memory when fetching all results. Can you refactor this
 to use cursor iteration?
 ```
 
@@ -385,7 +385,7 @@ to use cursor iteration?
 
 **Prompt for Claude:**
 ```
-Getting Unicode errors when writing WikiText files. Here's the current code 
+Getting Unicode errors when writing WikiText files. Here's the current code
 [paste]. How should I handle non-ASCII characters?
 ```
 
