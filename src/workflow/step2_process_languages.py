@@ -132,7 +132,7 @@ def process_languages(
         languages_to_skip = [
             lang
             for lang in languages_to_process
-            if not report_generator.load_editors_json(lang)
+            if report_generator.load_editors_json(lang)
         ]
         languages_to_process = [
             lang for lang in languages_to_process if lang not in languages_to_skip
