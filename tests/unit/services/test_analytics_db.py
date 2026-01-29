@@ -84,6 +84,7 @@ class TestDatabaseAnalyticsGetDatabaseInfo:
             assert host == "testwiki.analytics.db.svc.wikimedia.cloud"
 
 
+@pytest.mark.unit
 class TestDatabaseAnalyticsInit:
     """Tests for DatabaseAnalytics initialization."""
 
@@ -141,6 +142,7 @@ class TestDatabaseAnalyticsInit:
             )
 
 
+@pytest.mark.unit
 class TestDatabaseAnalyticsContextManager:
     """Tests for DatabaseAnalytics context manager behavior."""
 
