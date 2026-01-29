@@ -55,7 +55,12 @@ class WorkflowOrchestrator:
         Returns:
             Dictionary of all editors processed across languages
         """
-        return process_languages(year, languages, sort_descending=sort_descending, skip_existing=skip_existing)
+        return process_languages(
+            year,
+            languages,
+            sort_descending=sort_descending,
+            skip_existing=skip_existing,
+        )
 
     def generate_reports(
         self,

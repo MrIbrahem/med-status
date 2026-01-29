@@ -51,7 +51,8 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
     # Optional file handler (no colors)
     if log_file:
         file_formatter = logging.Formatter(
-            fmt="%(asctime)s - %(name)s - %(levelname)-8s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+            fmt="%(asctime)s - %(name)s - %(levelname)-8s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
         )
         file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
         file_handler.setFormatter(file_formatter)

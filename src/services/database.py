@@ -109,7 +109,13 @@ class Database(DatabaseUtils):
         ...     results = db.execute("SELECT * FROM page LIMIT 10")
     """
 
-    def __init__(self, host: str, database: str, port: int = 3306, timeout: Optional[float] = None) -> None:
+    def __init__(
+        self,
+        host: str,
+        database: str,
+        port: int = 3306,
+        timeout: Optional[float] = None,
+    ) -> None:
         """
         Initialize database connection parameters.
 
@@ -189,7 +195,13 @@ class Database(DatabaseUtils):
 
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                logger.debug("Connecting to %s/%s (attempt %d/%d)", self.host, self.database, attempt, MAX_RETRIES)
+                logger.debug(
+                    "Connecting to %s/%s (attempt %d/%d)",
+                    self.host,
+                    self.database,
+                    attempt,
+                    MAX_RETRIES,
+                )
 
                 # Merge config with connection parameters, avoiding duplicate port
                 connect_params = DATABASE_CONFIG.copy()
@@ -217,7 +229,12 @@ class Database(DatabaseUtils):
                 return
 
             except pymysql.err.OperationalError as e:
-                logger.warning("Connection failed (attempt %d/%d): %s", attempt, MAX_RETRIES, str(e))
+                logger.warning(
+                    "Connection failed (attempt %d/%d): %s",
+                    attempt,
+                    MAX_RETRIES,
+                    str(e),
+                )
 
                 if attempt < MAX_RETRIES:
                     wait_time = 2**attempt  # Exponential backoff

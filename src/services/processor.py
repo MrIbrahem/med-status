@@ -54,7 +54,7 @@ class EditorProcessor:
                 logger.debug("Skipped bot account: %s", actor_name)
                 continue
 
-            editors[actor_name] = count
+            editors[actor_name] = editors.get(actor_name, 0) + count
 
         return editors
 
@@ -82,7 +82,7 @@ class EditorProcessor:
         results = []
         try:
             # https://quarry.wmcloud.org/query/101549 Executed in 2289.70 seconds
-            with DatabaseAnalytics(lang, timeout=3_000) as db:
+            with DatabaseAnalytics(lang, timeout=None) as db:
                 results = db.execute(query, params=params)
 
         except Exception as e:

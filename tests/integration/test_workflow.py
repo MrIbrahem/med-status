@@ -11,12 +11,11 @@ from src.workflow import WorkflowOrchestrator
 class TestWorkflow:
     """Test complete workflow."""
 
-    @pytest.mark.skip(reason="Credential file not found")
     def test_full_pipeline(self, mocker):
         """Test complete data pipeline with mocked database."""
 
         # Mock database execute method to return different results based on query
-        def mock_execute(query):
+        def mock_execute(query, params=None):
             if "langlinks" in query:
                 # Medicine titles query
                 return [
@@ -43,7 +42,7 @@ class TestWorkflow:
         mock_db_context.__enter__ = mocker.Mock(return_value=mock_db)
         mock_db_context.__exit__ = mocker.Mock(return_value=None)
 
-        mocker.patch("src.workflow.Database", return_value=mock_db_context)
+        mocker.patch("src.services.analytics_db.Database", return_value=mock_db_context)
 
         # Mock file operations
         mocker.patch("src.utils.save_language_titles")
@@ -51,9 +50,9 @@ class TestWorkflow:
         mocker.patch("src.utils.get_available_languages", return_value=["en"])
 
         # Create actual instances but mock their file I/O
-        mocker.patch("src.reports.ReportGenerator.save_editors_json")
-        mocker.patch("src.reports.ReportGenerator.generate_language_report")
-        mocker.patch("src.reports.ReportGenerator.generate_global_report")
+        mocker.patch("src.services.reports.ReportGenerator.save_editors_json")
+        mocker.patch("src.services.reports.ReportGenerator.generate_language_report")
+        mocker.patch("src.services.reports.ReportGenerator.generate_global_report")
 
         # Run workflow
         orchestrator = WorkflowOrchestrator()

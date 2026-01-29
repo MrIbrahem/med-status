@@ -45,7 +45,12 @@ def _process_single_language(
         report_generator.save_editors_json(lang, editors)
         report_generator.generate_language_report(lang, editors, year)
 
-    logger.info("✓ Language '%s' complete: %d editors, %d edits", lang, len(editors), sum(editors.values()))
+    logger.info(
+        "✓ Language '%s' complete: %d editors, %d edits",
+        lang,
+        len(editors),
+        sum(editors.values()),
+    )
     return editors
 
 
@@ -78,7 +83,13 @@ def gather_language_titles(languages_to_process: List[str], sort_descending: boo
         titles: List[str] = load_language_titles_safe(lang, OUTPUT_DIRS["languages"])
         languages_titles[lang] = titles
 
-    languages_titles = dict(sorted(languages_titles.items(), key=lambda item: len(item[1]), reverse=sort_descending))
+    languages_titles = dict(
+        sorted(
+            languages_titles.items(),
+            key=lambda item: len(item[1]),
+            reverse=sort_descending,
+        )
+    )
 
     return languages_titles
 
@@ -114,9 +125,11 @@ def process_languages(
 
     report_generator = ReportGenerator()
     if skip_existing:
-        languages_to_skip = [lang for lang in languages_to_process if report_generator.load_editors_json(lang)]
-        languages_to_process = [lang for lang in languages_to_process if lang not in languages_to_skip]
-        logger.info("✓ Skipped %d languages with existing data", len(languages_to_skip))
+        initial_languages = languages_to_process
+        languages_to_process = [lang for lang in initial_languages if not report_generator.load_editors_json(lang)]
+        skipped_count = len(initial_languages) - len(languages_to_process)
+        if skipped_count > 0:
+            logger.info("✓ Skipped %d languages with existing data", skipped_count)
 
     languages_titles: dict[str, list[str]] = gather_language_titles(
         languages_to_process, sort_descending=sort_descending
