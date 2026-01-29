@@ -107,9 +107,9 @@ class QueryBuilder:
             year: Year to filter (e.g., "2024")
 
         Returns:
-            SQL query string
+            Tuple of SQL query string and parameters list
         """
-        return f"""
+        query = """
             SELECT actor_name, COUNT(*) as count
             FROM revision
             JOIN actor ON rev_actor = actor_id
@@ -118,15 +118,17 @@ class QueryBuilder:
                 SELECT DISTINCT pa_page_id
                 FROM page_assessments, page_assessments_projects
                 WHERE pa_project_id = pap_project_id
-                  AND pap_project_title = "طب"
+                    AND pap_project_title = "طب"
             )
-              AND page_namespace = 0
-              AND rev_timestamp LIKE '{year}%'
-              AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
+                AND page_namespace = 0
+                AND rev_timestamp LIKE %s
+                AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%%bot%%'
             GROUP BY actor_id
             ORDER BY count DESC
             LIMIT 100
-        """, []
+        """
+        params = [f"{year}%"]
+        return query, params
 
     @staticmethod
     def get_editors_english(year: str) -> tuple[str, List[str]]:
@@ -139,9 +141,9 @@ class QueryBuilder:
             year: Year to filter (e.g., "2025")
 
         Returns:
-            SQL query string
+            Tuple of SQL query string and parameters list
         """
-        return f"""
+        query = """
             SELECT actor_name, COUNT(*) as count
             FROM revision
             JOIN actor ON rev_actor = actor_id
@@ -152,23 +154,25 @@ class QueryBuilder:
                     SELECT tl_from, rd_from
                     FROM templatelinks
                     LEFT JOIN redirect
-                      ON rd_from = tl_from
-                      AND rd_title = 'WikiProject_Medicine'
-                      AND (rd_interwiki = '' OR rd_interwiki IS NULL)
-                      AND rd_namespace = 10
+                        ON rd_from = tl_from
+                        AND rd_title = "WikiProject_Medicine"
+                        AND (rd_interwiki = '' OR rd_interwiki IS NULL)
+                        AND rd_namespace = 10
                     JOIN page ON tl_from = page_id
                     JOIN linktarget ON tl_target_id = lt_id
                     WHERE lt_namespace = 10
-                      AND lt_title = 'WikiProject_Medicine'
+                        AND lt_title = "WikiProject_Medicine"
                     ORDER BY tl_from
                 ) temp
                 JOIN page ON tl_from = page_id
                 WHERE page_namespace = 1
             )
-              AND page_namespace = 0
-              AND rev_timestamp LIKE '{year}%'
-              AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%bot%'
+                AND page_namespace = 0
+                AND rev_timestamp LIKE %s
+                AND LOWER(CAST(actor_name AS CHAR)) NOT LIKE '%%bot%%'
             GROUP BY actor_id
             ORDER BY count DESC
             LIMIT 100
-        """, []
+        """
+        params = [f"{year}%"]
+        return query, params
