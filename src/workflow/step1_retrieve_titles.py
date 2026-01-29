@@ -51,7 +51,7 @@ def _save_language_summary_report(titles_by_language: Dict[str, List[str]]) -> N
 
     with open(output_file, "w", encoding="utf-8") as f:
         f.write(wiki_text)
-    logger.info(" ✓ Saved language titles summary report to %s", output_file)
+    logger.info(" ✓ Saved language titles summary report to %s", output_file.name)
 
 
 def _save_language_files(titles_by_language: Dict[str, List[str]]) -> None:
