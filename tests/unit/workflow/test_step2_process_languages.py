@@ -225,9 +225,9 @@ class TestProcessLanguages:
 
         mocker.patch("src.workflow.step2_process_languages.load_language_titles_safe", return_value=["Medicine"])
 
-        # Mock report generator to return existing data for "en" only
+        # Mock report generator to return existing data for "en" only (non-empty dict = truthy)
         mock_report_gen = mocker.Mock()
-        mock_report_gen.load_editors_json.side_effect = lambda lang: {"en": {}, "fr": None}.get(lang)
+        mock_report_gen.load_editors_json.side_effect = lambda lang: {"en": {"Editor1": 100}, "fr": None}.get(lang)
         mocker.patch("src.workflow.step2_process_languages.ReportGenerator", return_value=mock_report_gen)
 
         mocker.patch(
@@ -285,7 +285,7 @@ class TestProcessLanguages:
 
         mocker.patch(
             "src.workflow.step2_process_languages._process_titles_for_language",
-            side_effect=lambda lang, **_: {lang: 100},
+            side_effect=lambda lang, *_, **__: {lang: 100},
         )
 
         mock_report_gen = mocker.Mock()
