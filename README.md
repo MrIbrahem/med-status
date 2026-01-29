@@ -60,26 +60,26 @@ password=your_password
 Run the complete analysis:
 
 ```bash
-python -m src.main
+python start.py
 ```
 
 ### Advanced Options
 
 ```bash
 # Process specific languages only
-python -m src.main --languages es,fr,de
+python start.py --languages es,fr,de
 
 # Set custom year
-python -m src.main --year 2024
+python start.py --year 2024
 
 # Skip title retrieval (use existing data)
-python -m src.main --skip-titles
+python start.py --skip-titles
 
 # Generate reports only
-python -m src.main --reports-only
+python start.py --reports-only
 
 # Enable debug logging
-python -m src.main --log-level DEBUG
+python start.py --log-level DEBUG
 ```
 
 ## Project Structure
