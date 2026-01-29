@@ -273,8 +273,13 @@ class TestDatabaseAnalyticsEdgeCases:
 class TestDatabaseAnalytics:
     """Test DatabaseAnalytics class."""
 
-    def test_check_database_name_special_cases_under(self):
-        db_utils = DatabaseAnalytics("be-x-old")
+    @patch("src.services.analytics_db.Database")
+    def test_check_database_name_special_cases_under(self, mock_database_class):
+        """Test database name handling for special cases with underscores."""
+        mock_db_instance = MagicMock()
+        mock_database_class.return_value = mock_db_instance
 
-        assert db_utils.database == "be_x_oldwiki_p"
-        assert db_utils.host == "be_x_oldwiki.analytics.db.svc.wikimedia.cloud"
+        db_analytics = DatabaseAnalytics("be-x-old")
+
+        assert db_analytics.database == "be_x_oldwiki_p"
+        assert db_analytics.host == "be_x_oldwiki.analytics.db.svc.wikimedia.cloud"
