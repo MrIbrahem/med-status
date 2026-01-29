@@ -12,7 +12,7 @@ from typing import Dict
 
 from ..config import OUTPUT_DIRS
 from ..logging_config import get_logger
-from ..utils import load_language_titles
+from ..utils import is_ip_address, load_language_titles
 
 logger = get_logger(__name__)
 
@@ -160,6 +160,13 @@ class ReportGenerator:
 
         for lang, editors in all_editors.items():
             for editor, count in editors.items():
+                if ">" in editor:
+                    # en>Jako96 -> Jako96
+                    editor = editor.split(">", 1)[1]
+
+                if is_ip_address(editor):
+                    continue  # Skip IP addresses
+
                 global_editors[editor] += count
                 editors_by_wiki[editor][lang] += count
 
