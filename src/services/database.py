@@ -49,11 +49,26 @@ class Database:
             port: Database port (default: 3306)
         """
         self.host = host
-        self.database = database
+        self.database = self._check_database_name(database)
         self.port = port
         self.connection: Optional[pymysql.connections.Connection] = None
 
         logger.debug("Database initialized: %s/%s", host, database)
+
+    def _check_database_name(self, dbname: str) -> str:
+        """
+        Ensure database name ends with '_p'.
+
+        Args:
+            dbname: Original database name
+
+        Returns:
+            Validated database name
+        """
+        if not dbname.endswith("_p"):
+            logger.warning("Database name '%s' does not end with '_p'. Appending suffix.", dbname)
+            dbname += "_p"
+        return dbname
 
     def __enter__(self) -> "Database":
         """
