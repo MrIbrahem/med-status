@@ -140,7 +140,9 @@ class EditorProcessor:
                     logger.error("Failed to process language %s: %s", lang, str(e), exc_info=True)
                     raise
 
-                editors.update(self._aggregate_results(results))
+                editors_patch = self._aggregate_results(results)
+                for editor, count in editors_patch.items():
+                    editors[editor] = editors.get(editor, 0) + count
 
         return editors
 
