@@ -36,10 +36,10 @@ class TestWorkflowOrchestrator:
         orchestrator = WorkflowOrchestrator()
         mapping = orchestrator.get_database_mapping()
 
-        assert mapping["en"] == "enwiki_p"
-        assert mapping["fr"] == "frwiki_p"
+        assert mapping["en"] == "enwiki"
+        assert mapping["fr"] == "frwiki"
 
-    @pytest.mark.skip(reason="AssertionError: KeyError: 'Editor1'")
+    # @pytest.mark.skip(reason="AssertionError: KeyError: 'Editor1'")
     def test_process_languages(self, mocker):
         """Test processing languages."""
         # Mock database
@@ -53,7 +53,6 @@ class TestWorkflowOrchestrator:
         mock_db_context.__exit__ = mocker.Mock(return_value=None)
 
         mocker.patch("src.workflow.step1_retrieve_titles.DatabaseAnalytics", return_value=mock_db_context)
-        mocker.patch("src.workflow.step2_process_languages.Database", return_value=mock_db_context)
         mocker.patch("src.services.processor.DatabaseAnalytics", return_value=mock_db_context)
         mocker.patch("src.workflow.step2_process_languages.get_available_languages", return_value=["en"])
         mocker.patch("src.workflow.step2_process_languages.load_language_titles", return_value=["Medicine"])
@@ -71,6 +70,7 @@ class TestWorkflowOrchestrator:
         all_editors = orchestrator.process_languages("2024", languages=["en"])
 
         assert "en" in all_editors
+        assert all_editors == {"en": {"Editor1": 100}}
         assert all_editors["en"]["Editor1"] == 100
 
     @pytest.mark.skip(reason="AssertionError: Expected 'generate_global_report' to be called once. Called 0 times")

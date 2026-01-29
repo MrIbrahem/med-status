@@ -10,7 +10,6 @@ from ..services.processor import EditorProcessor
 from ..services.queries import QueryBuilder
 from ..services.reports import ReportGenerator
 from ..utils import get_available_languages, load_language_titles
-from .db_mapping import get_database_mapping
 
 logger = get_logger(__name__)
 
@@ -34,40 +33,27 @@ def _get_languages_to_process(languages: Optional[List[str]]) -> List[str]:
 
 def _process_single_language(
     lang: str,
-    index: int,
-    total: int,
-    db_mapping: Dict[str, str],
     year: str,
     batch_size: int,
-    all_editors: Dict[str, Dict[str, int]],
-) -> None:
+) -> Dict[str, int]:
     """Process a single language."""
     report_generator = ReportGenerator()
-    logger.info("")
-    logger.info("-" * 60)
-    logger.info("Language %d/%d: %s", index, total, lang)
-    logger.info("-" * 60)
 
     titles = load_language_titles(lang, OUTPUT_DIRS["languages"])
 
-    if lang not in db_mapping:
-        logger.warning("No database mapping for language '%s', skipping", lang)
-        return
+    editors = _process_titles_for_language(lang, titles, year, batch_size)
 
-    dbname = db_mapping[lang]
-    editors = _process_titles_for_language(lang, titles, dbname, year, batch_size)
-
-    all_editors[lang] = editors
-    report_generator.save_editors_json(lang, editors)
-    report_generator.generate_language_report(lang, editors, year)
+    if editors:
+        report_generator.save_editors_json(lang, editors)
+        report_generator.generate_language_report(lang, editors, year)
 
     logger.info("✓ Language '%s' complete: %d editors, %d edits", lang, len(editors), sum(editors.values()))
+    return editors
 
 
 def _process_titles_for_language(
     lang: str,
     titles: List[str],
-    dbname: str,
     year: str,
     batch_size: int,
 ) -> Dict[str, int]:
@@ -115,7 +101,6 @@ def process_languages(
     logger.info("Step 2: Processing editor statistics by language")
     logger.info("=" * 60)
 
-    db_mapping = get_database_mapping()
     languages_to_process = _get_languages_to_process(languages)
 
     logger.info("Processing %d languages", len(languages_to_process))
@@ -123,7 +108,13 @@ def process_languages(
     all_editors: Dict[str, Dict[str, int]] = {}
 
     for i, lang in enumerate(languages_to_process, 1):
-        _process_single_language(lang, i, len(languages_to_process), db_mapping, year, batch_size, all_editors)
+        logger.info("")
+        logger.info("-" * 60)
+        logger.info("Language %d/%d: %s", i, len(languages_to_process), lang)
+        logger.info("-" * 60)
+        lang_editors = _process_single_language(lang, year, batch_size)
+        if lang_editors:
+            all_editors[lang] = lang_editors
 
     logger.info("")
     logger.info("✓ Step 2 complete: %d languages processed", len(all_editors))

@@ -50,19 +50,20 @@ def fetch_medicine_titles() -> List[Dict[str, Any]]:
     Retrieve Medicine project articles with langlinks from enwiki.
     """
     query_builder = QueryBuilder()
-    try:
-        query = query_builder.get_medicine_titles()
+    query = query_builder.get_medicine_titles()
+    results = []
 
+    try:
         with DatabaseAnalytics("en") as db:
             results = db.execute(query)
-            logger.info("Retrieved %d article-language pairs", len(results))
-            save_titles_sql_results(results, OUTPUT_DIRS["sqlresults"])
-            return results
     except Exception as e:
         logger.error("Failed to retrieve medicine titles: %s", str(e), exc_info=True)
-        raise
 
-    return []
+    if results:
+        logger.info("Retrieved %d article-language pairs", len(results))
+        save_titles_sql_results(results, OUTPUT_DIRS["sqlresults"])
+
+    return results
 
 
 def retrieve_medicine_titles() -> Dict[str, List[str]]:

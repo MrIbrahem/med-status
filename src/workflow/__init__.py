@@ -10,7 +10,8 @@ from ..services.processor import EditorProcessor
 from ..services.queries import QueryBuilder
 from ..services.reports import ReportGenerator
 from .step1_retrieve_titles import retrieve_medicine_titles
-from .step2_process_languages import get_database_mapping, process_languages
+from .step2_process_languages import process_languages
+from .db_mapping import get_database_mapping
 from .step3_generate_reports import generate_reports
 
 logger = get_logger(__name__)
