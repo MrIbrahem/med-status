@@ -54,7 +54,7 @@ LOG_DATE_FORMAT: str = "%Y-%m-%d %H:%M:%S"
 DATABASE_CONFIG: Dict[str, Any] = {
     "port": DATABASE_PORT,
     "charset": DATABASE_CHARSET,
-    "connect_timeout": 30,
+    "connect_timeout": 60,
     "read_timeout": QUERY_TIMEOUT,
     "autocommit": True,
 }
