@@ -1,7 +1,7 @@
 """ """
 
 from ..logging_config import get_logger
-from ..services.database import Database
+from ..services import Database
 from .db_mapping import get_database_name_for_language
 
 logger = get_logger(__name__)

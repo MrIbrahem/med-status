@@ -6,9 +6,7 @@ from typing import Dict, List, Optional
 
 from ..config import BATCH_SIZE, OUTPUT_DIRS
 from ..logging_config import get_logger
-from ..services.processor import EditorProcessor
-from ..services.queries import QueryBuilder
-from ..services.reports import ReportGenerator
+from ..services import EditorProcessor, QueryBuilder, ReportGenerator
 from ..utils import get_available_languages, load_language_titles
 
 logger = get_logger(__name__)
