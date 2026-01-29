@@ -176,7 +176,7 @@ class TestDatabaseEdgeCases:
                 with pytest.raises(ValueError, match="Invalid credential file format"):
                     db._load_credentials()
 
-    def test_load_credentials_empty_lines(self, mocker):
+    def test_load_credentials_empty_lines(self):
         """Test _load_credentials with empty lines."""
         with patch("os.path.exists", return_value=True):
             with patch("builtins.open", mock_open(read_data="\nuser=test\n\npassword=pass\n")):
@@ -185,7 +185,7 @@ class TestDatabaseEdgeCases:
                 assert creds["user"] == "test"
                 assert creds["password"] == "pass"
 
-    def test_load_credentials_with_comments(self, mocker):
+    def test_load_credentials_with_comments(self):
         """Test _load_credentials ignores lines that don't start with user/password."""
         with patch("os.path.exists", return_value=True):
             with patch("builtins.open", mock_open(read_data="# comment\nuser=test\npassword=pass\n")):
@@ -235,7 +235,7 @@ class TestDatabaseEdgeCases:
                 with pytest.raises(pymysql.err.OperationalError):
                     db._connect()
 
-    def test_execute_without_connection(self, mocker):
+    def test_execute_without_connection(self):
         """Test execute when connection is not established."""
         with patch("os.path.exists", return_value=True):
             with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
@@ -244,7 +244,7 @@ class TestDatabaseEdgeCases:
                 with pytest.raises(RuntimeError, match="Database connection not established"):
                     db.execute("SELECT * FROM test")
 
-    def test_execute_with_programming_error(self, mocker):
+    def test_execute_with_programming_error(self):
         """Test execute with SQL syntax error."""
         with patch("os.path.exists", return_value=True):
             with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
@@ -263,7 +263,7 @@ class TestDatabaseEdgeCases:
                         with pytest.raises(pymysql.err.ProgrammingError):
                             db.execute("INVALID SQL")
 
-    def test_execute_with_operational_error(self, mocker):
+    def test_execute_with_operational_error(self):
         """Test execute with operational error during query execution."""
         with patch("os.path.exists", return_value=True):
             with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
@@ -281,3 +281,39 @@ class TestDatabaseEdgeCases:
                     with Database("localhost", "test") as db:
                         with pytest.raises(pymysql.err.OperationalError):
                             db.execute("SELECT * FROM test")
+
+    def test_connect_port_from_database_config(self, mocker):
+        """Test that port from DATABASE_CONFIG is properly handled."""
+        # Import the actual DATABASE_CONFIG which contains a port
+        from src.config import DATABASE_CONFIG
+
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
+                mock_conn = Mock()
+
+                # Use side_effect to verify connection params include the port
+                original_connect = mocker.patch("src.services.database.pymysql.connect", return_value=mock_conn)
+
+                db = Database("localhost", "test", port=9999)  # Different port
+                db._connect()
+
+                # The DATABASE_CONFIG port should override the initial port
+                assert db.port == DATABASE_CONFIG.get("port", 3306)
+                # Verify connect was called
+                original_connect.assert_called_once()
+
+    def test_connect_without_port_in_database_config(self, mocker):
+        """Test connect when DATABASE_CONFIG has no port (uses initial port)."""
+        with patch("os.path.exists", return_value=True):
+            with patch("builtins.open", mock_open(read_data="user=test\npassword=pass\n")):
+                mock_conn = Mock()
+                mocker.patch("src.services.database.pymysql.connect", return_value=mock_conn)
+
+                # Patch DATABASE_CONFIG without a port
+                mocker.patch("src.services.database.DATABASE_CONFIG", {})
+
+                db = Database("localhost", "test", port=3307)
+                db._connect()
+
+                # The initial port should be preserved
+                assert db.port == 3307
