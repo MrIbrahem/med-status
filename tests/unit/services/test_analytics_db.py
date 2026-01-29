@@ -90,9 +90,7 @@ class TestDatabaseAnalyticsInit:
 
     def test_init_with_standard_language(self):
         """Test initialization with standard language code."""
-        with (
-            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db
-        ):
+        with patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db:
             mock_get_db.return_value = "enwiki"
 
             db_analytics = DatabaseAnalytics("en")
