@@ -17,6 +17,15 @@ from .logging_config import get_logger
 logger = get_logger(__name__)
 
 
+def is_user_skippable(text: str) -> bool:
+    skip_list = [
+        "CommonsDelinker",
+    ]
+    if text in skip_list:
+        return True
+    return False
+
+
 def is_ip_address(text: str) -> bool:
     """
     Check if text is an IP address (IPv4 or IPv6).
@@ -33,6 +42,9 @@ def is_ip_address(text: str) -> bool:
         >>> is_ip_address("Username")
         False
     """
+    if is_user_skippable(text):
+        return True
+
     # temporary accounts: ~2025-16569-5
     temp_account_pattern = r"^~\d{4}[\d\-]+$"
     # IPv4 pattern
