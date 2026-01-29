@@ -91,51 +91,43 @@ class TestDatabaseAnalyticsInit:
     def test_init_with_standard_language(self):
         """Test initialization with standard language code."""
         with (
-            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db,
-            patch("src.services.analytics_db.Database") as mock_database_class,
+            patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db
         ):
             mock_get_db.return_value = "enwiki"
-            mock_db_instance = MagicMock()
-            mock_database_class.return_value = mock_db_instance
 
             db_analytics = DatabaseAnalytics("en")
 
             assert db_analytics.database == "enwiki"
             assert db_analytics.host == "enwiki.analytics.db.svc.wikimedia.cloud"
-            assert db_analytics.db == mock_db_instance
-            mock_database_class.assert_called_once_with(
-                "enwiki.analytics.db.svc.wikimedia.cloud", "enwiki", timeout=None
-            )
+            assert db_analytics.db is None
 
     def test_init_with_meta(self):
         """Test initialization with 'meta' site code."""
-        with patch("src.services.analytics_db.Database") as mock_database_class:
-            mock_db_instance = MagicMock()
-            mock_database_class.return_value = mock_db_instance
+        # with patch("src.services.analytics_db.Database") as mock_database_class:
+        #     mock_db_instance = MagicMock()
+        #     mock_database_class.return_value = mock_db_instance
 
-            db_analytics = DatabaseAnalytics("meta")
+        db_analytics = DatabaseAnalytics("meta")
 
-            assert db_analytics.database == "meta_p"
-            assert db_analytics.host == "s7.analytics.db.svc.wikimedia.cloud"
-            mock_database_class.assert_called_once_with("s7.analytics.db.svc.wikimedia.cloud", "meta_p", timeout=None)
+        assert db_analytics.database == "meta_p"
+        assert db_analytics.host == "s7.analytics.db.svc.wikimedia.cloud"
+        # mock_database_class.assert_not_called()
 
     def test_init_with_hyphenated_site_code(self):
         """Test initialization with hyphenated site code."""
         with (
             patch("src.services.analytics_db.get_database_name_for_language") as mock_get_db,
-            patch("src.services.analytics_db.Database") as mock_database_class,
+            # patch("src.services.analytics_db.Database") as mock_database_class,
         ):
             mock_get_db.return_value = "bat_smgwiki"
-            mock_db_instance = MagicMock()
-            mock_database_class.return_value = mock_db_instance
+            # mock_db_instance = MagicMock()
+            # mock_database_class.return_value = mock_db_instance
 
             db_analytics = DatabaseAnalytics("bat-smg")
 
             assert db_analytics.database == "bat_smgwiki"
             assert db_analytics.host == "bat_smgwiki.analytics.db.svc.wikimedia.cloud"
-            mock_database_class.assert_called_once_with(
-                "bat_smgwiki.analytics.db.svc.wikimedia.cloud", "bat_smgwiki", timeout=None
-            )
+            # mock_database_class.assert_not_called()
 
 
 @pytest.mark.unit

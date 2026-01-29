@@ -29,6 +29,7 @@ class DatabaseAnalytics:
             timeout: Connection timeout in seconds
         """
         database, host = self.get_database_info(site_code)
+        self.timeout = timeout
         self.database = database
         self.host = host
         self.db = None
