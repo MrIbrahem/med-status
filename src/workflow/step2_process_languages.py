@@ -78,7 +78,7 @@ def _process_titles_for_language(
     return editors
 
 
-def gather_language_titles(languages_to_process) -> dict:
+def gather_language_titles(languages_to_process: List[str]) -> dict[str, list[str]]:
     """
     Gather titles for all languages to process.
 
@@ -88,10 +88,11 @@ def gather_language_titles(languages_to_process) -> dict:
     Returns:
         Dictionary mapping language codes to their article titles
     """
-    languages_titles = {}
+    languages_titles: dict[str, list[str]] = {}
     for lang in tqdm(languages_to_process, desc="Loading language titles"):
-        titles = load_language_titles_safe(lang, OUTPUT_DIRS["languages"])
+        titles: List[str] = load_language_titles_safe(lang, OUTPUT_DIRS["languages"])
         languages_titles[lang] = titles
+
     return languages_titles
 
 
@@ -118,11 +119,11 @@ def process_languages(
     logger.info("Step 2: Processing editor statistics by language")
     logger.info("=" * 60)
 
-    languages_to_process = _get_languages_to_process(languages)
+    languages_to_process: List[str] = _get_languages_to_process(languages)
 
     logger.info("Processing %d languages", len(languages_to_process))
 
-    languages_titles = gather_language_titles(languages_to_process)
+    languages_titles: dict[str, list[str]] = gather_language_titles(languages_to_process)
 
     all_editors: Dict[str, Dict[str, int]] = {}
 
