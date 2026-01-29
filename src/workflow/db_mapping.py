@@ -1,10 +1,10 @@
-"""
+""" """
 
-"""
 import functools
 import json
 from pathlib import Path
 from typing import Dict
+
 from ..config import OUTPUT_DIRS
 from ..logging_config import get_logger
 from ..services.database import Database

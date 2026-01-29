@@ -2,13 +2,13 @@
 Step 1: Retrieve medicine titles
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from ..config import OUTPUT_DIRS
 from ..logging_config import get_logger
-from .analytics_db import DatabaseAnalytics
 from ..services.queries import QueryBuilder
 from ..utils import save_language_titles, save_titles_sql_results
+from .analytics_db import DatabaseAnalytics
 
 logger = get_logger(__name__)
 

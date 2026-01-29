@@ -3,10 +3,12 @@ Application configuration.
 
 All configuration constants for the Wikipedia Medicine project.
 """
+
 import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
+
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -7,10 +7,9 @@ aggregating editor statistics from Wikipedia databases.
 
 from typing import Dict, List
 
-from ..workflow.analytics_db import DatabaseAnalytics
-
 from ..logging_config import get_logger
 from ..utils import is_ip_address
+from ..workflow.analytics_db import DatabaseAnalytics
 from .queries import QueryBuilder
 
 logger = get_logger(__name__)
@@ -29,9 +28,7 @@ class EditorProcessor:
         self.query_builder = QueryBuilder()
         logger.debug("EditorProcessor initialized")
 
-    def process_language(
-        self, lang: str, titles: List[str], year: str
-    ) -> Dict[str, int]:
+    def process_language(self, lang: str, titles: List[str], year: str) -> Dict[str, int]:
         """
         Process editor statistics for a specific language.
 
