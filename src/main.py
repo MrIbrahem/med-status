@@ -10,10 +10,10 @@ import sys
 
 from .config import LAST_YEAR, LOG_LEVEL
 from .logging_config import get_logger, setup_logging
+from .workflow import WorkflowOrchestrator
 
 logger = get_logger(__name__)
 
-from .workflow import WorkflowOrchestrator
 
 def parse_arguments() -> argparse.Namespace:
     """
