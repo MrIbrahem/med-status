@@ -21,7 +21,7 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
         >>> setup_logging(level="DEBUG", log_file="app.log")
     """
     # Convert string level to logging constant
-    numeric_level = getattr(logging, level.upper(), logging.INFO)
+    numeric_level = getattr(logging, level.upper(), logging.INFO) if isinstance(level, str) else level
 
     # Create color formatter for console
     console_formatter = colorlog.ColoredFormatter(
