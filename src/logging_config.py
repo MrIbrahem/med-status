@@ -4,12 +4,26 @@ Logging configuration with colored output.
 
 import logging
 import sys
-from typing import Optional
+from pathlib import Path
 
 import colorlog
 
 
-def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
+def prepare_log_file(log_file, project_logger):
+    log_file = Path(log_file).expanduser()
+    try:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        project_logger.error(f"Failed to create log directory: {e}")
+        log_file = None
+    return log_file
+
+
+def setup_logging(
+    level: str = "INFO",
+    name: str = "status",
+    log_file: str | None = None,
+) -> None:
     """
     Configure colored logging for console and optional file output.
 
@@ -20,6 +34,8 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
     Example:
         >>> setup_logging(level="DEBUG", log_file="app.log")
     """
+    project_logger = logging.getLogger(name)
+
     # Convert string level to logging constant
     numeric_level = getattr(logging, level.upper(), logging.INFO) if isinstance(level, str) else level
 
@@ -44,24 +60,28 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
     console_handler.setLevel(numeric_level)
 
     # Root logger configuration
-    root_logger = logging.getLogger()
-    root_logger.setLevel(numeric_level)
-    root_logger.addHandler(console_handler)
+    project_logger.setLevel(numeric_level)
+    project_logger.addHandler(console_handler)
 
     # Optional file handler (no colors)
     if log_file:
-        file_formatter = logging.Formatter(
-            fmt="%(asctime)s - %(name)s - %(levelname)-8s - %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-        file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
-        file_handler.setFormatter(file_formatter)
-        file_handler.setLevel(numeric_level)
-        root_logger.addHandler(file_handler)
+        log_file = prepare_log_file(log_file, project_logger)
+        setup_file_handler(project_logger, log_file, numeric_level)
 
     # Silence noisy third-party loggers
     logging.getLogger("urllib3").setLevel(logging.WARNING)
     logging.getLogger("pymysql").setLevel(logging.WARNING)
+
+
+def setup_file_handler(project_logger, log_file, level):
+    file_formatter = logging.Formatter(
+        fmt="%(asctime)s - %(name)s - %(levelname)-8s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    file_handler = logging.FileHandler(log_file, mode="a", encoding="utf-8")
+    file_handler.setFormatter(file_formatter)
+    file_handler.setLevel(level)
+    project_logger.addHandler(file_handler)
 
 
 def get_logger(name: str) -> logging.Logger:
